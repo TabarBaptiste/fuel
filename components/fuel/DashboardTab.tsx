@@ -114,13 +114,13 @@ export function DashboardTab({
                     <Plus className="w-5 h-5 text-indigo-600" />
                     Ajouter un plein
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <FormField label="Date">
                         <input
                             type="date"
                             value={newEntry.date}
                             onChange={(e) => onInputChange('date', e.target.value)}
-                            className="input-field"
+                            className="input-field w-full max-w-[140px]"
                         />
                     </FormField>
                     <FormField label="Km compteur">
