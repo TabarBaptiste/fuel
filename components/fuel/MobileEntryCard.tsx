@@ -40,14 +40,14 @@ export function MobileEntryCard({ entry, onDelete, isDeleting, isAuthenticated }
                     </div>
                     <div className="bg-gray-50 rounded-lg p-3">
                         <p className="text-gray-500 text-xs">Litres</p>
-                        <p className="font-semibold">{entry.litres.toFixed(2)} L</p>
+                        <p className="font-semibold">{entry.litres.toFixed(2)} L à {entry.prixLitre.toFixed(2)} €</p>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-3">
                         <p className="text-gray-500 text-xs">Coût</p>
                         <p className="font-semibold">{entry.coutTotal.toFixed(2)} €</p>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-gray-500 text-xs">Conso</p>
+                        <p className="text-gray-500 text-xs">Conso L/100km</p>
                         <ConsumptionBadge value={entry.consoL100km} />
                     </div>
                 </div>
