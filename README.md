@@ -42,7 +42,7 @@ fuel-app/
     └── manifest.json      # PWA manifest
 ```
 
-## 🚀 Installation
+<!-- ## 🚀 Installation
 
 ### 1. Cloner et installer les dépendances
 
@@ -137,7 +137,7 @@ L'application est configurée comme une Progressive Web App. Ajoutez des icônes
 |---------|----------|-------------|
 | GET | `/api/entries` | Liste toutes les entrées |
 | POST | `/api/entries` | Crée une nouvelle entrée |
-| DELETE | `/api/entries?id=X` | Supprime une entrée |
+| DELETE | `/api/entries?id=X` | Supprime une entrée | -->
 
 ## 📄 License
 

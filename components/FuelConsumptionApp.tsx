@@ -147,9 +147,9 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
           <StatCard
             icon={<DollarSign className="w-6 h-6 text-amber-600" />}
             iconBg="bg-amber-100"
-            title="Coût Total"
-            value={`${stats.totalCout.toFixed(2)} €`}
-            subtitle={`${stats.coutMoyenPer100km.toFixed(2)} €/100km`}
+            title="Coût moyen"
+            value={`${stats.coutMoyenPer100km.toFixed(2)} €`}
+            subtitle="pour 100 km"
           />
         </div>
 
@@ -299,6 +299,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <DetailStat label="Coût Moyen au Litre" value={`${stats.coutMoyenLitre.toFixed(2)} €`} />
             <DetailStat label="Total Litres Consommés" value={`${stats.totalLitres.toFixed(2)} L`} />
+            <DetailStat label="Coût Total" value={`${stats.totalCout.toFixed(2)} €`} />
             <DetailStat label="Nombre de Pleins" value={`${Math.max(0, entries.length - 1)}`} />
           </div>
         </div>
