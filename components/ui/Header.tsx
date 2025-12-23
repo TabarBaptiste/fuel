@@ -8,7 +8,7 @@ interface HeaderProps {
     onTankCapacityChange: (value: number) => void
     defaultCapacity: number
     isAuthenticated: boolean
-    onLogin: (pin: string) => void
+    onLogin: (pin: string) => Promise<boolean>
     onLogout: () => void
     loginLoading: boolean
     loginError: string | null
@@ -29,12 +29,15 @@ export function Header({
     const [showLoginModal, setShowLoginModal] = useState(false)
     const [pin, setPin] = useState('')
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         if (pin.length === 4) {
-            onLogin(pin)
-            setPin('')
-            setShowLoginModal(false)
+            const success = await onLogin(pin)
+            if (success) {
+                setPin('')
+                setShowLoginModal(false)
+            }
+            // Si échec, on ne ferme pas la modal et on garde le PIN pour permettre une nouvelle tentative
         }
     }
 

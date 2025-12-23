@@ -119,7 +119,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     if (e.key === 'Enter' && !isLoading) addEntry()
   }, [addEntry, isLoading])
 
-  const handleLogin = useCallback(async (pin: string) => {
+  const handleLogin = useCallback(async (pin: string): Promise<boolean> => {
     setLoginLoading(true)
     setLoginError(null)
 
@@ -129,11 +129,13 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     const correctPin = process.env.NEXT_PUBLIC_PIN_CODE
     if (pin === correctPin) {
       setIsAuthenticated(true)
+      setLoginLoading(false)
+      return true
     } else {
       setLoginError('Code incorrect. Veuillez réessayer.')
+      setLoginLoading(false)
+      return false
     }
-
-    setLoginLoading(false)
   }, [])
 
   const handleLogout = useCallback(() => {
