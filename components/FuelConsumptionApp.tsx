@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useMemo } from 'react'
 import { AlertCircle, Fuel, Loader2, Trash2 } from 'lucide-react'
 import { FuelEntry, NewEntryForm } from '@/lib/types'
-import { calculateStats, estimateTrip, estimateFullTankCost } from '@/lib/calculations'
+import { calculateStats, estimateTrip, estimateFullTankCost, DEFAULT_TANK_CAPACITY } from '@/lib/calculations'
 import { Header } from '@/components/ui/Header'
 import { NavigationTabs } from '@/components/ui/NavigationTabs'
 import { DashboardTab } from '@/components/fuel/DashboardTab'
@@ -13,8 +13,6 @@ import { ChartsTab } from '@/components/fuel/ChartsTab'
 interface Props {
   initialEntries: FuelEntry[]
 }
-
-const DEFAULT_TANK_CAPACITY = 50
 
 export default function FuelConsumptionApp({ initialEntries }: Props) {
   const [entries, setEntries] = useState<FuelEntry[]>(initialEntries)

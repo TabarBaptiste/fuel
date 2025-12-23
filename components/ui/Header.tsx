@@ -28,6 +28,12 @@ export function Header({
 }: HeaderProps) {
     const [showLoginModal, setShowLoginModal] = useState(false)
     const [pin, setPin] = useState('')
+    const [capacityInput, setCapacityInput] = useState(tankCapacity.toString())
+
+    // Synchroniser capacityInput quand tankCapacity change depuis l'extérieur
+    React.useEffect(() => {
+        setCapacityInput(tankCapacity.toString())
+    }, [tankCapacity])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -85,8 +91,27 @@ export function Header({
                             </label>
                             <input
                                 type="number"
-                                value={tankCapacity}
-                                onChange={(e) => onTankCapacityChange(parseFloat(e.target.value) || defaultCapacity)}
+                                value={capacityInput}
+                                onChange={(e) => {
+                                    const value = e.target.value
+                                    setCapacityInput(value)
+                                    // Mettre à jour tankCapacity seulement si la valeur est valide
+                                    const numValue = parseFloat(value)
+                                    if (!isNaN(numValue) && numValue > 0) {
+                                        onTankCapacityChange(numValue)
+                                    }
+                                }}
+                                onBlur={() => {
+                                    // Si l'utilisateur quitte le champ avec une valeur invalide, remettre la valeur par défaut
+                                    const numValue = parseFloat(capacityInput)
+                                    if (isNaN(numValue) || numValue <= 0) {
+                                        const defaultStr = defaultCapacity.toString()
+                                        setCapacityInput(defaultStr)
+                                        onTankCapacityChange(defaultCapacity)
+                                    }
+                                }}
+                                min="1"
+                                step="1"
                                 className="input-field w-32"
                             />
                         </div>

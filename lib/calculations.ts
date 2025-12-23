@@ -1,7 +1,7 @@
 import { FuelEntry, EnrichedFuelEntry, Stats, CalculatedData, MonthlyStats, TripEstimate } from './types'
 
 const SLIDING_WINDOW = 5 // Nombre de pleins pour la moyenne glissante
-const DEFAULT_TANK_CAPACITY = 50 // Capacité par défaut en litres
+export const DEFAULT_TANK_CAPACITY = 45 // Capacité par défaut en litres
 
 export function calculateStats(entries: FuelEntry[], tankCapacity: number = DEFAULT_TANK_CAPACITY): CalculatedData {
   const sortedEntries = [...entries].sort(
