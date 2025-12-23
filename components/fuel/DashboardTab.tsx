@@ -120,7 +120,8 @@ export function DashboardTab({
                             type="date"
                             value={newEntry.date}
                             onChange={(e) => onInputChange('date', e.target.value)}
-                            className="input-field w-full max-w-[140px]"
+                            className="input-field w-full max-w-[120px] text-sm"
+                            style={{ fontSize: '14px' }}
                         />
                     </FormField>
                     <FormField label="Km compteur">
