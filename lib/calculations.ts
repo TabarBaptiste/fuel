@@ -56,8 +56,9 @@ export function calculateStats(entries: FuelEntry[], tankCapacity: number = DEFA
     ? recentConsumptions.reduce((a, b) => a + b, 0) / recentConsumptions.length
     : 0
 
-  // Prix moyen des derniers pleins
-  const recentEntries = sortedEntries.slice(-SLIDING_WINDOW)
+  // Prix moyen des derniers pleins (ignore les entrées avec 0 litres)
+  const validEntries = sortedEntries.filter(e => e.litres > 0)
+  const recentEntries = validEntries.slice(-SLIDING_WINDOW)
   const prixMoyenLitreRecent = recentEntries.length > 0
     ? recentEntries.reduce((sum, e) => sum + e.prixLitre, 0) / recentEntries.length
     : 0
