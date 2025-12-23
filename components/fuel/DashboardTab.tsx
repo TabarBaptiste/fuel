@@ -120,7 +120,7 @@ export function DashboardTab({
                             type="date"
                             value={newEntry.date}
                             onChange={(e) => onInputChange('date', e.target.value)}
-                            className="input-field w-full max-w-[120px] text-sm"
+                            className="input-field w-full max-w-[120px] text-sm sm:max-w-none sm:text-base"
                             style={{ fontSize: '14px' }}
                         />
                     </FormField>
