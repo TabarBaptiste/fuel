@@ -26,6 +26,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loginLoading, setLoginLoading] = useState(false)
+  const [kmCompteurError, setKmCompteurError] = useState<string | null>(null)
 
   const [newEntry, setNewEntry] = useState<NewEntryForm>({
     date: new Date().toISOString().split('T')[0],
@@ -80,8 +81,20 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
       return
     }
 
+    // Validation : vérifier que le km compteur est supérieur au dernier enregistré
+    const lastKmCompteur = entries.length > 0
+      ? Math.max(...entries.map(entry => entry.kmCompteur))
+      : 0
+
+    const currentKmCompteur = parseFloat(newEntry.kmCompteur)
+    if (currentKmCompteur <= lastKmCompteur) {
+      setKmCompteurError(`Le kilométrage doit être supérieur au dernier relevé (${lastKmCompteur.toLocaleString('fr-FR')} km)`)
+      return
+    }
+
     setIsLoading(true)
     setError(null)
+    setKmCompteurError(null)
 
     try {
       const response = await fetch('/api/entries', {
@@ -132,6 +145,9 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   const handleInputChange = useCallback((field: keyof NewEntryForm, value: string) => {
     setNewEntry((prev) => ({ ...prev, [field]: value }))
     setError(null)
+    if (field === 'kmCompteur') {
+      setKmCompteurError(null)
+    }
   }, [])
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
@@ -209,6 +225,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
             isLoading={isLoading}
             onAddEntry={addEntry}
             isAuthenticated={isAuthenticated}
+            kmCompteurError={kmCompteurError}
           />
         )}
 

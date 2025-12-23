@@ -19,6 +19,7 @@ interface DashboardTabProps {
     isLoading: boolean
     onAddEntry: () => void
     isAuthenticated: boolean
+    kmCompteurError?: string | null
 }
 
 export function DashboardTab({
@@ -35,7 +36,11 @@ export function DashboardTab({
     isLoading,
     onAddEntry,
     isAuthenticated,
+    kmCompteurError,
 }: DashboardTabProps) {
+    // Récupérer les dernières valeurs pour les placeholders
+    const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null
+
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Key Questions Cards */}
@@ -124,13 +129,13 @@ export function DashboardTab({
                             style={{ fontSize: '14px' }}
                         />
                     </FormField>
-                    <FormField label="Km compteur">
+                    <FormField label="Km compteur" error={kmCompteurError}>
                         <input
                             type="number"
                             value={newEntry.kmCompteur}
                             onChange={(e) => onInputChange('kmCompteur', e.target.value)}
                             onKeyPress={onKeyPress}
-                            placeholder="152198"
+                            placeholder={lastEntry ? lastEntry.kmCompteur.toString() : "152198"}
                             className="input-field"
                         />
                     </FormField>
@@ -141,7 +146,7 @@ export function DashboardTab({
                             value={newEntry.litres}
                             onChange={(e) => onInputChange('litres', e.target.value)}
                             onKeyPress={onKeyPress}
-                            placeholder="35.25"
+                            placeholder={lastEntry ? lastEntry.litres.toString() : "35.25"}
                             className="input-field"
                         />
                     </FormField>
@@ -152,7 +157,7 @@ export function DashboardTab({
                             value={newEntry.prixLitre}
                             onChange={(e) => onInputChange('prixLitre', e.target.value)}
                             onKeyPress={onKeyPress}
-                            placeholder="1.69"
+                            placeholder={lastEntry ? lastEntry.prixLitre.toString() : "1.69"}
                             className="input-field"
                         />
                     </FormField>
