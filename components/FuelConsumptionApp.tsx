@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { AlertCircle, Fuel, Loader2, Trash2 } from 'lucide-react'
 import { FuelEntry, NewEntryForm } from '@/lib/types'
 import { calculateStats, estimateTrip, estimateFullTankCost, DEFAULT_TANK_CAPACITY } from '@/lib/calculations'
@@ -52,6 +52,27 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     () => estimateFullTankCost(tankCapacity, stats.prixMoyenLitreRecent),
     [tankCapacity, stats.prixMoyenLitreRecent]
   )
+
+  // Charger l'état d'authentification depuis localStorage au montage
+  useEffect(() => {
+    const savedAuth = localStorage.getItem('fuelAppAuthenticated')
+    const savedTimestamp = localStorage.getItem('fuelAppAuthTimestamp')
+    
+    if (savedAuth === 'true' && savedTimestamp) {
+      const timestamp = parseInt(savedTimestamp)
+      const now = Date.now()
+      // Expiration après 30 jours (30 * 24 * 60 * 60 * 1000 ms)
+      const thirtyDays = 30 * 24 * 60 * 60 * 1000
+      
+      if (now - timestamp < thirtyDays) {
+        setIsAuthenticated(true)
+      } else {
+        // Nettoyer si l'authentification a expiré
+        localStorage.removeItem('fuelAppAuthenticated')
+        localStorage.removeItem('fuelAppAuthTimestamp')
+      }
+    }
+  }, [])
 
   const addEntry = useCallback(async () => {
     if (!newEntry.kmCompteur || !newEntry.litres || !newEntry.prixLitre) {
@@ -127,6 +148,9 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     const correctPin = process.env.NEXT_PUBLIC_PIN_CODE
     if (pin === correctPin) {
       setIsAuthenticated(true)
+      // Sauvegarder l'authentification dans localStorage
+      localStorage.setItem('fuelAppAuthenticated', 'true')
+      localStorage.setItem('fuelAppAuthTimestamp', Date.now().toString())
       setLoginLoading(false)
       return true
     } else {
@@ -139,6 +163,9 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   const handleLogout = useCallback(() => {
     setIsAuthenticated(false)
     setLoginError(null)
+    // Supprimer l'authentification du localStorage
+    localStorage.removeItem('fuelAppAuthenticated')
+    localStorage.removeItem('fuelAppAuthTimestamp')
   }, [])
 
   return (
