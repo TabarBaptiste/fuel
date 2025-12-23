@@ -25,6 +25,9 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   const [tripDistance, setTripDistance] = useState('')
   const [showSettings, setShowSettings] = useState(false)
   const [activeTab, setActiveTab] = useState<'dashboard' | 'history' | 'charts'>('dashboard')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const [loginLoading, setLoginLoading] = useState(false)
 
   const [newEntry, setNewEntry] = useState<NewEntryForm>({
     date: new Date().toISOString().split('T')[0],
@@ -116,6 +119,28 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     if (e.key === 'Enter' && !isLoading) addEntry()
   }, [addEntry, isLoading])
 
+  const handleLogin = useCallback(async (pin: string) => {
+    setLoginLoading(true)
+    setLoginError(null)
+
+    // Simuler un délai pour l'UX
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    const correctPin = process.env.NEXT_PUBLIC_PIN_CODE
+    if (pin === correctPin) {
+      setIsAuthenticated(true)
+    } else {
+      setLoginError('Code incorrect. Veuillez réessayer.')
+    }
+
+    setLoginLoading(false)
+  }, [])
+
+  const handleLogout = useCallback(() => {
+    setIsAuthenticated(false)
+    setLoginError(null)
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <Header
@@ -124,6 +149,11 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
         onToggleSettings={() => setShowSettings(!showSettings)}
         onTankCapacityChange={setTankCapacity}
         defaultCapacity={DEFAULT_TANK_CAPACITY}
+        isAuthenticated={isAuthenticated}
+        onLogin={handleLogin}
+        onLogout={handleLogout}
+        loginLoading={loginLoading}
+        loginError={loginError}
       />
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6 pb-24">
@@ -151,6 +181,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
             onKeyPress={handleKeyPress}
             isLoading={isLoading}
             onAddEntry={addEntry}
+            isAuthenticated={isAuthenticated}
           />
         )}
 
@@ -160,6 +191,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
             onDelete={deleteEntry}
             deletingId={deletingId}
             hasEntries={entries.length > 0}
+            isAuthenticated={isAuthenticated}
           />
         )}
 

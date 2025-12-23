@@ -18,6 +18,7 @@ interface DashboardTabProps {
     onKeyPress: (e: React.KeyboardEvent) => void
     isLoading: boolean
     onAddEntry: () => void
+    isAuthenticated: boolean
 }
 
 export function DashboardTab({
@@ -33,6 +34,7 @@ export function DashboardTab({
     onKeyPress,
     isLoading,
     onAddEntry,
+    isAuthenticated,
 }: DashboardTabProps) {
     return (
         <div className="space-y-6 animate-fade-in">
@@ -156,11 +158,13 @@ export function DashboardTab({
                 </div>
                 <button
                     onClick={onAddEntry}
-                    disabled={isLoading}
+                    disabled={isLoading || !isAuthenticated}
                     className="btn-primary mt-4 w-full flex items-center justify-center gap-2"
                 >
                     {isLoading ? (
                         <><Loader2 className="w-5 h-5 animate-spin" /> Ajout en cours...</>
+                    ) : !isAuthenticated ? (
+                        <><Plus className="w-5 h-5" /> Connexion requise</>
                     ) : (
                         <><Plus className="w-5 h-5" /> Ajouter le plein</>
                     )}

@@ -11,9 +11,10 @@ interface HistoryTabProps {
     onDelete: (id: number) => void
     deletingId: number | null
     hasEntries: boolean
+    isAuthenticated: boolean
 }
 
-export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries }: HistoryTabProps) {
+export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries, isAuthenticated }: HistoryTabProps) {
     return (
         <div className="space-y-4 animate-fade-in">
             <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -56,11 +57,13 @@ export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries }
                                     <td className="table-cell text-center">
                                         <button
                                             onClick={() => onDelete(entry.id)}
-                                            disabled={deletingId === entry.id}
+                                            disabled={deletingId === entry.id || !isAuthenticated}
                                             className="btn-danger"
                                         >
                                             {deletingId === entry.id ? (
                                                 <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : !isAuthenticated ? (
+                                                <span className="text-gray-400">🔒</span>
                                             ) : (
                                                 <Trash2 className="w-4 h-4" />
                                             )}
@@ -81,6 +84,7 @@ export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries }
                         entry={entry}
                         onDelete={onDelete}
                         isDeleting={deletingId === entry.id}
+                        isAuthenticated={isAuthenticated}
                     />
                 ))}
             </div>

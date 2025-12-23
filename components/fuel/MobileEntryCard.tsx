@@ -16,9 +16,10 @@ interface MobileEntryCardProps {
     }
     onDelete: (id: number) => void
     isDeleting: boolean
+    isAuthenticated: boolean
 }
 
-export function MobileEntryCard({ entry, onDelete, isDeleting }: MobileEntryCardProps) {
+export function MobileEntryCard({ entry, onDelete, isDeleting, isAuthenticated }: MobileEntryCardProps) {
     return (
         <div className="card p-4">
             <div className="flex justify-between items-start mb-3">
@@ -26,8 +27,8 @@ export function MobileEntryCard({ entry, onDelete, isDeleting }: MobileEntryCard
                     <p className="font-semibold text-gray-800">{formatDateLong(entry.date)}</p>
                     <p className="text-sm text-gray-500">{entry.kmCompteur.toLocaleString('fr-FR')} km</p>
                 </div>
-                <button onClick={() => onDelete(entry.id)} disabled={isDeleting} className="btn-danger">
-                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                <button onClick={() => onDelete(entry.id)} disabled={isDeleting || !isAuthenticated} className="btn-danger">
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : !isAuthenticated ? <span className="text-gray-400">🔒</span> : <Trash2 className="w-4 h-4" />}
                 </button>
             </div>
 

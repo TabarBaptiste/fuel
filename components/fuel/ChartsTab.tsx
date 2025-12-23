@@ -1,5 +1,5 @@
 import React from 'react'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3, Euro, Fuel, TrendingUp, Calendar } from 'lucide-react'
 import { ChartCard } from './ChartCard'
 import { SimpleBarChart } from './SimpleBarChart'
 import { ConsumptionBadge } from './ConsumptionBadge'
@@ -22,8 +22,9 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
                 <>
                     {/* Cost per Month Chart */}
                     <ChartCard
-                        title="💸 Coût par mois"
+                        title="Coût par mois"
                         subtitle="Dépenses mensuelles en carburant"
+                        icon={<Euro className="w-5 h-5 text-amber-600" />}
                     >
                         <SimpleBarChart
                             data={monthlyStats}
@@ -36,8 +37,9 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
 
                     {/* Liters per Month Chart */}
                     <ChartCard
-                        title="⛽ Litres achetés par mois"
+                        title="Litres achetés par mois"
                         subtitle="Volume de carburant consommé"
+                        icon={<Fuel className="w-5 h-5 text-blue-600" />}
                     >
                         <SimpleBarChart
                             data={monthlyStats}
@@ -50,8 +52,9 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
 
                     {/* Consumption per Month Chart */}
                     <ChartCard
-                        title="📊 Consommation moyenne par mois"
+                        title="Consommation moyenne par mois"
                         subtitle="L/100km - évolution de l'efficacité"
+                        icon={<TrendingUp className="w-5 h-5 text-green-600" />}
                     >
                         <SimpleBarChart
                             data={monthlyStats}
@@ -66,7 +69,10 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
                     {/* Monthly Summary Table */}
                     <div className="card overflow-hidden">
                         <div className="p-4 border-b border-gray-200">
-                            <h3 className="font-semibold text-gray-800">📅 Résumé mensuel</h3>
+                            <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                                <Calendar className="w-5 h-5 text-indigo-600" />
+                                Résumé mensuel
+                            </h3>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
