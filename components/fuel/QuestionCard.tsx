@@ -11,7 +11,7 @@ interface QuestionCardProps {
 
 export function QuestionCard({ icon, iconBg, question, mainValue, mainLabel, subValue }: QuestionCardProps) {
     return (
-        <div className="card p-5 hover:scale-[1.02] transition-transform">
+        <div className="card p-5">
             <div className="flex items-center gap-3 mb-3">
                 <div className={`bg-gradient-to-br ${iconBg} p-2.5 rounded-xl text-white shadow-lg`}>
                     {icon}
