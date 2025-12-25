@@ -76,20 +76,26 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   }, [])
 
   const addEntry = useCallback(async () => {
-    if (!newEntry.kmCompteur || !newEntry.litres || !newEntry.prixLitre) {
-      setError('Veuillez remplir tous les champs')
+    if (!newEntry.litres || !newEntry.prixLitre) {
+      setError('Veuillez remplir tous les champs requis')
       return
     }
 
-    // Validation : vérifier que le km compteur est supérieur au dernier enregistré
-    const lastKmCompteur = entries.length > 0
-      ? Math.max(...entries.map(entry => entry.kmCompteur))
-      : 0
+    // Déterminer automatiquement le mode selon si kmCompteur est rempli
+    const hasKilometers = newEntry.kmCompteur && newEntry.kmCompteur.trim() !== ''
 
-    const currentKmCompteur = parseFloat(newEntry.kmCompteur)
-    if (currentKmCompteur <= lastKmCompteur) {
-      setKmCompteurError(`Le kilométrage doit être supérieur au dernier relevé (${lastKmCompteur.toLocaleString('fr-FR')} km)`)
-      return
+    // Validation : vérifier que le km compteur est supérieur au dernier enregistré (seulement si rempli)
+    if (hasKilometers) {
+      const entriesWithKm = entries.filter(entry => entry.kmCompteur > 0)
+      const lastKmCompteur = entriesWithKm.length > 0
+        ? Math.max(...entriesWithKm.map(entry => entry.kmCompteur))
+        : 0
+
+      const currentKmCompteur = parseFloat(newEntry.kmCompteur)
+      if (currentKmCompteur <= lastKmCompteur) {
+        setKmCompteurError(`Le kilométrage doit être supérieur au dernier relevé (${lastKmCompteur.toLocaleString('fr-FR')} km)`)
+        return
+      }
     }
 
     setIsLoading(true)
@@ -102,7 +108,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           date: newEntry.date,
-          kmCompteur: parseFloat(newEntry.kmCompteur),
+          kmCompteur: hasKilometers ? parseFloat(newEntry.kmCompteur) : 0,
           litres: parseFloat(newEntry.litres),
           prixLitre: parseFloat(newEntry.prixLitre),
         }),
@@ -124,7 +130,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     } finally {
       setIsLoading(false)
     }
-  }, [newEntry])
+  }, [newEntry, entries])
 
   const deleteEntry = useCallback(async (id: number) => {
     setDeletingId(id)

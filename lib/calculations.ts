@@ -17,22 +17,30 @@ export function calculateStats(entries: FuelEntry[], tankCapacity: number = DEFA
   for (let i = 0; i < sortedEntries.length; i++) {
     const entry = sortedEntries[i]
     let kmParcourus = 0
-    let coutTotal = 0
+    let coutTotal = entry.litres * entry.prixLitre // Calculer le coût pour toutes les entrées
     let consoL100km = 0
     let coutPer100km = 0
 
     if (i > 0) {
       const prevEntry = sortedEntries[i - 1]
-      kmParcourus = entry.kmCompteur - prevEntry.kmCompteur
-      coutTotal = entry.litres * entry.prixLitre
-
-      if (kmParcourus > 0) {
-        consoL100km = (entry.litres / kmParcourus) * 100
-        coutPer100km = (coutTotal / kmParcourus) * 100
-        consumptions.push(consoL100km)
+      
+      // Seulement calculer kmParcourus si les deux entrées ont un kilométrage
+      if (entry.kmCompteur > 0 && prevEntry.kmCompteur > 0) {
+        kmParcourus = entry.kmCompteur - prevEntry.kmCompteur
+        
+        if (kmParcourus > 0) {
+          consoL100km = (entry.litres / kmParcourus) * 100
+          coutPer100km = (coutTotal / kmParcourus) * 100
+          consumptions.push(consoL100km)
+        }
+        
+        totalKm += kmParcourus
       }
-
-      totalKm += kmParcourus
+      
+      totalLitres += entry.litres
+      totalCout += coutTotal
+    } else {
+      // Première entrée : ajouter au total même sans km parcourus
       totalLitres += entry.litres
       totalCout += coutTotal
     }
@@ -92,8 +100,7 @@ export function calculateMonthlyStats(enrichedEntries: EnrichedFuelEntry[]): Mon
   const monthlyMap = new Map<string, { coutTotal: number; litresTotal: number; consumptions: number[]; nbPleins: number }>()
 
   for (const entry of enrichedEntries) {
-    if (entry.kmParcourus <= 0) continue // Skip le premier plein
-
+    // Inclure toutes les entrées (avec ou sans kilométrage) pour les coûts et litres
     const date = new Date(entry.date)
     const moisKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 
@@ -105,7 +112,9 @@ export function calculateMonthlyStats(enrichedEntries: EnrichedFuelEntry[]): Mon
     data.coutTotal += entry.coutTotal
     data.litresTotal += entry.litres
     data.nbPleins += 1
-    if (entry.consoL100km > 0) {
+    
+    // Ajouter la consommation seulement si on a des données de kilométrage valides
+    if (entry.kmParcourus > 0 && entry.consoL100km > 0) {
       data.consumptions.push(entry.consoL100km)
     }
   }

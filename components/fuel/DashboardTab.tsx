@@ -49,6 +49,7 @@ export function DashboardTab({
                     <Plus className="w-5 h-5 text-indigo-600" />
                     Ajouter un plein
                 </h2>
+                
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <FormField label="Date">
                         <input
@@ -59,13 +60,13 @@ export function DashboardTab({
                             style={{ fontSize: '14px' }}
                         />
                     </FormField>
-                    <FormField label="Km compteur" error={kmCompteurError}>
+                    <FormField label="Km compteur (optionnel)" error={kmCompteurError}>
                         <input
                             type="number"
                             value={newEntry.kmCompteur}
                             onChange={(e) => onInputChange('kmCompteur', e.target.value)}
                             onKeyPress={onKeyPress}
-                            placeholder={lastEntry ? lastEntry.kmCompteur.toString() : "152198"}
+                            placeholder={lastEntry && lastEntry.kmCompteur > 0 ? lastEntry.kmCompteur.toString() : "Laisser vide pour suivi coûts uniquement"}
                             className="input-field"
                         />
                     </FormField>
