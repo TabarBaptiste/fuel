@@ -56,7 +56,6 @@ export function calculateStats(entries: FuelEntry[], tankCapacity: number = DEFA
 
   const consoMoyenne = totalKm > 0 ? (totalLitres / totalKm) * 100 : 0
   const coutMoyenLitre = totalLitres > 0 ? totalCout / totalLitres : 0
-  const coutMoyenPer100km = totalKm > 0 ? (totalCout / totalKm) * 100 : 0
 
   // Moyenne glissante des 5 derniers pleins
   const recentConsumptions = consumptions.slice(-SLIDING_WINDOW)
@@ -69,6 +68,11 @@ export function calculateStats(entries: FuelEntry[], tankCapacity: number = DEFA
   const recentEntries = validEntries.slice(-SLIDING_WINDOW)
   const prixMoyenLitreRecent = recentEntries.length > 0
     ? recentEntries.reduce((sum, e) => sum + e.prixLitre, 0) / recentEntries.length
+    : 0
+
+  // Coût estimé actuel par 100km (basé sur la conso et le prix récents)
+  const coutMoyenPer100km = consoMoyenneGlissante > 0 && prixMoyenLitreRecent > 0
+    ? consoMoyenneGlissante * prixMoyenLitreRecent
     : 0
 
   // Autonomie estimée

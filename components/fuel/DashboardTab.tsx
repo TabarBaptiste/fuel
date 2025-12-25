@@ -179,10 +179,12 @@ export function DashboardTab({
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <MiniStat label="Total parcouru" value={`${stats.totalKm.toLocaleString('fr-FR')} km`} />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <MiniStat label="Total litres" value={`${stats.totalLitres.toFixed(0)} L`} />
+                <MiniStat label="Total dépenses" value={`${stats.totalCout.toFixed(0)} €`} />
+                <MiniStat label="Coût/100km" value={`${stats.coutMoyenPer100km.toFixed(2)} €`} />
                 <MiniStat label="Prix moyen/L" value={`${stats.prixMoyenLitreRecent.toFixed(3)} €`} />
+                <MiniStat label="Total parcouru" value={`${stats.totalKm.toLocaleString('fr-FR')} km`} />
                 <MiniStat label="Nombre de pleins" value={`${Math.max(0, entries.length - 1)}`} />
             </div>
         </div>
