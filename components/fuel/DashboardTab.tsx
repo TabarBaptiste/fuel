@@ -43,6 +43,70 @@ export function DashboardTab({
 
     return (
         <div className="space-y-6 animate-fade-in">
+            {/* Add Entry Form - Moved to top */}
+            <div className="card p-5">
+                <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-indigo-600" />
+                    Ajouter un plein
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <FormField label="Date">
+                        <input
+                            type="date"
+                            value={newEntry.date}
+                            onChange={(e) => onInputChange('date', e.target.value)}
+                            className="input-field w-full max-w-[120px] text-sm sm:max-w-none sm:text-base"
+                            style={{ fontSize: '14px' }}
+                        />
+                    </FormField>
+                    <FormField label="Km compteur" error={kmCompteurError}>
+                        <input
+                            type="number"
+                            value={newEntry.kmCompteur}
+                            onChange={(e) => onInputChange('kmCompteur', e.target.value)}
+                            onKeyPress={onKeyPress}
+                            placeholder={lastEntry ? lastEntry.kmCompteur.toString() : "152198"}
+                            className="input-field"
+                        />
+                    </FormField>
+                    <FormField label="Litres">
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={newEntry.litres}
+                            onChange={(e) => onInputChange('litres', e.target.value)}
+                            onKeyPress={onKeyPress}
+                            placeholder={lastEntry ? lastEntry.litres.toString() : "35.25"}
+                            className="input-field"
+                        />
+                    </FormField>
+                    <FormField label="Prix/L (€)">
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={newEntry.prixLitre}
+                            onChange={(e) => onInputChange('prixLitre', e.target.value)}
+                            onKeyPress={onKeyPress}
+                            placeholder={lastEntry ? lastEntry.prixLitre.toString() : "1.69"}
+                            className="input-field"
+                        />
+                    </FormField>
+                </div>
+                <button
+                    onClick={onAddEntry}
+                    disabled={isLoading || !isAuthenticated}
+                    className="btn-primary mt-4 w-full flex items-center justify-center gap-2"
+                >
+                    {isLoading ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" /> Ajout en cours...</>
+                    ) : !isAuthenticated ? (
+                        <><Plus className="w-5 h-5" /> Connexion requise</>
+                    ) : (
+                        <><Plus className="w-5 h-5" /> Ajouter le plein</>
+                    )}
+                </button>
+            </div>
+
             {/* Key Questions Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Question 1: Combien me coûte ma voiture par mois ? */}
@@ -111,70 +175,6 @@ export function DashboardTab({
                     mainLabel="réservoir plein"
                     subValue={`Plein complet ≈ ${fullTankCost.toFixed(0)} €`}
                 />
-            </div>
-
-            {/* Add Entry Form */}
-            <div className="card p-5">
-                <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <Plus className="w-5 h-5 text-indigo-600" />
-                    Ajouter un plein
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <FormField label="Date">
-                        <input
-                            type="date"
-                            value={newEntry.date}
-                            onChange={(e) => onInputChange('date', e.target.value)}
-                            className="input-field w-full max-w-[120px] text-sm sm:max-w-none sm:text-base"
-                            style={{ fontSize: '14px' }}
-                        />
-                    </FormField>
-                    <FormField label="Km compteur" error={kmCompteurError}>
-                        <input
-                            type="number"
-                            value={newEntry.kmCompteur}
-                            onChange={(e) => onInputChange('kmCompteur', e.target.value)}
-                            onKeyPress={onKeyPress}
-                            placeholder={lastEntry ? lastEntry.kmCompteur.toString() : "152198"}
-                            className="input-field"
-                        />
-                    </FormField>
-                    <FormField label="Litres">
-                        <input
-                            type="number"
-                            step="0.01"
-                            value={newEntry.litres}
-                            onChange={(e) => onInputChange('litres', e.target.value)}
-                            onKeyPress={onKeyPress}
-                            placeholder={lastEntry ? lastEntry.litres.toString() : "35.25"}
-                            className="input-field"
-                        />
-                    </FormField>
-                    <FormField label="Prix/L (€)">
-                        <input
-                            type="number"
-                            step="0.01"
-                            value={newEntry.prixLitre}
-                            onChange={(e) => onInputChange('prixLitre', e.target.value)}
-                            onKeyPress={onKeyPress}
-                            placeholder={lastEntry ? lastEntry.prixLitre.toString() : "1.69"}
-                            className="input-field"
-                        />
-                    </FormField>
-                </div>
-                <button
-                    onClick={onAddEntry}
-                    disabled={isLoading || !isAuthenticated}
-                    className="btn-primary mt-4 w-full flex items-center justify-center gap-2"
-                >
-                    {isLoading ? (
-                        <><Loader2 className="w-5 h-5 animate-spin" /> Ajout en cours...</>
-                    ) : !isAuthenticated ? (
-                        <><Plus className="w-5 h-5" /> Connexion requise</>
-                    ) : (
-                        <><Plus className="w-5 h-5" /> Ajouter le plein</>
-                    )}
-                </button>
             </div>
 
             {/* Quick Stats */}
