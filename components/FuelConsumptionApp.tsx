@@ -190,6 +190,60 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     localStorage.removeItem('fuelAppAuthTimestamp')
   }, [])
 
+  const handleExportData = useCallback(() => {
+    // Créer un objet avec toutes les données
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      tankCapacity,
+      entries: entries.map(entry => ({
+        id: entry.id,
+        date: entry.date,
+        kmCompteur: entry.kmCompteur,
+        litres: entry.litres,
+        prixLitre: entry.prixLitre
+      })),
+      stats: {
+        totalKm: stats.totalKm,
+        totalLitres: stats.totalLitres,
+        totalCout: stats.totalCout,
+        coutMoyenLitre: stats.coutMoyenLitre,
+        coutMoyenPer100km: stats.coutMoyenPer100km,
+        consoMoyenneGlissante: stats.consoMoyenneGlissante,
+        prixMoyenLitreRecent: stats.prixMoyenLitreRecent,
+        autonomieEstimee: stats.autonomieEstimee
+      },
+      monthlyStats: monthlyStats.map(month => ({
+        mois: month.mois,
+        moisLabel: month.moisLabel,
+        coutTotal: month.coutTotal,
+        litresTotal: month.litresTotal,
+        consoMoyenne: month.consoMoyenne,
+        nbPleins: month.nbPleins
+      }))
+    }
+
+    // Convertir en JSON
+    const jsonString = JSON.stringify(exportData, null, 2)
+    
+    // Créer un blob et un lien de téléchargement
+    const blob = new Blob([jsonString], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    
+    // Nom de fichier avec la date
+    const dateStr = new Date().toISOString().split('T')[0]
+    link.download = `fuel-data-${dateStr}.json`
+    
+    // Déclencher le téléchargement
+    document.body.appendChild(link)
+    link.click()
+    
+    // Nettoyer
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }, [entries, tankCapacity, stats, monthlyStats])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <Header
@@ -203,6 +257,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
         onLogout={handleLogout}
         loginLoading={loginLoading}
         loginError={loginError}
+        onExportData={handleExportData}
       />
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6 pb-24">

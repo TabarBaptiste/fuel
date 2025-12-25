@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Fuel, Settings, LogIn, LogOut, Loader2, X } from 'lucide-react'
+import { Fuel, Settings, LogIn, LogOut, Loader2, X, Download } from 'lucide-react'
 
 interface HeaderProps {
     tankCapacity: number
@@ -12,6 +12,7 @@ interface HeaderProps {
     onLogout: () => void
     loginLoading: boolean
     loginError: string | null
+    onExportData: () => void
 }
 
 export function Header({
@@ -24,7 +25,8 @@ export function Header({
     onLogin,
     onLogout,
     loginLoading,
-    loginError
+    loginError,
+    onExportData
 }: HeaderProps) {
     const [showLoginModal, setShowLoginModal] = useState(false)
     const [pin, setPin] = useState('')
@@ -85,35 +87,49 @@ export function Header({
                     </div>
 
                     {showSettings && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-xl animate-fade-in">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Capacité du réservoir (L)
-                            </label>
-                            <input
-                                type="number"
-                                value={capacityInput}
-                                onChange={(e) => {
-                                    const value = e.target.value
-                                    setCapacityInput(value)
-                                    // Mettre à jour tankCapacity seulement si la valeur est valide
-                                    const numValue = parseFloat(value)
-                                    if (!isNaN(numValue) && numValue > 0) {
-                                        onTankCapacityChange(numValue)
-                                    }
-                                }}
-                                onBlur={() => {
-                                    // Si l'utilisateur quitte le champ avec une valeur invalide, remettre la valeur par défaut
-                                    const numValue = parseFloat(capacityInput)
-                                    if (isNaN(numValue) || numValue <= 0) {
-                                        const defaultStr = defaultCapacity.toString()
-                                        setCapacityInput(defaultStr)
-                                        onTankCapacityChange(defaultCapacity)
-                                    }
-                                }}
-                                min="1"
-                                step="1"
-                                className="input-field w-32"
-                            />
+                        <div className="mt-4 p-4 bg-gray-50 rounded-xl animate-fade-in space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Capacité du réservoir (L)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={capacityInput}
+                                    onChange={(e) => {
+                                        const value = e.target.value
+                                        setCapacityInput(value)
+                                        // Mettre à jour tankCapacity seulement si la valeur est valide
+                                        const numValue = parseFloat(value)
+                                        if (!isNaN(numValue) && numValue > 0) {
+                                            onTankCapacityChange(numValue)
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        // Si l'utilisateur quitte le champ avec une valeur invalide, remettre la valeur par défaut
+                                        const numValue = parseFloat(capacityInput)
+                                        if (isNaN(numValue) || numValue <= 0) {
+                                            const defaultStr = defaultCapacity.toString()
+                                            setCapacityInput(defaultStr)
+                                            onTankCapacityChange(defaultCapacity)
+                                        }
+                                    }}
+                                    min="1"
+                                    step="1"
+                                    className="input-field w-32"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Exporter les données
+                                </label>
+                                <button
+                                    onClick={onExportData}
+                                    className="btn-secondary flex items-center gap-2"
+                                >
+                                    <Download className="w-4 h-4" />
+                                    Exporter en JSON
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
