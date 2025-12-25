@@ -74,7 +74,9 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
                                 Résumé mensuel
                             </h3>
                         </div>
-                        <div className="overflow-x-auto">
+
+                        {/* Desktop Table */}
+                        <div className="hidden md:block overflow-x-auto">
                             <table className="w-full">
                                 <thead className="bg-gray-50">
                                     <tr>
@@ -99,6 +101,32 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* Mobile Cards */}
+                        <div className="md:hidden space-y-3 p-4">
+                            {[...monthlyStats].reverse().map((month) => (
+                                <div key={month.mois} className="bg-gray-50 rounded-lg p-4">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h4 className="font-semibold text-gray-800">{month.moisLabel}</h4>
+                                        <ConsumptionBadge value={month.consoMoyenne} />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-3 text-sm">
+                                        <div className="text-center">
+                                            <p className="text-gray-500">Coût</p>
+                                            <p className="font-semibold text-amber-600">{month.coutTotal.toFixed(2)} €</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-gray-500">Litres</p>
+                                            <p className="font-semibold text-blue-600">{month.litresTotal.toFixed(1)} L</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-gray-500">Pleins</p>
+                                            <p className="font-semibold text-indigo-600">{month.nbPleins}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </>
