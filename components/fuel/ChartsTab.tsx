@@ -1,7 +1,7 @@
 import React from 'react'
-import { BarChart3, Euro, Fuel, TrendingUp, Calendar } from 'lucide-react'
+import { BarChart3, Calendar } from 'lucide-react'
 import { ChartCard } from './ChartCard'
-import { SimpleBarChart } from './SimpleBarChart'
+import { CombinedBarChart } from './CombinedBarChart'
 import { ConsumptionBadge } from './ConsumptionBadge'
 import { EmptyState } from './EmptyState'
 import { MonthlyStats } from '@/lib/types'
@@ -20,49 +20,37 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
 
             {monthlyStats.length > 0 ? (
                 <>
-                    {/* Cost per Month Chart */}
+                    {/* Combined Chart */}
                     <ChartCard
-                        title="Coût par mois"
-                        subtitle="Dépenses mensuelles en carburant"
-                        icon={<Euro className="w-5 h-5 text-amber-600" />}
+                        // title="Coûts, litres et consommation par mois"
+                        subtitle="Coûts, litres et consommation par mois"
+                        // icon={<BarChart3 className="w-5 h-5 text-indigo-600" />}
                     >
-                        <SimpleBarChart
+                        <CombinedBarChart
                             data={monthlyStats}
-                            valueKey="coutTotal"
-                            labelKey="moisLabel"
-                            color="from-amber-400 to-orange-500"
-                            unit="€"
-                        />
-                    </ChartCard>
-
-                    {/* Liters per Month Chart */}
-                    <ChartCard
-                        title="Litres achetés par mois"
-                        subtitle="Volume de carburant consommé"
-                        icon={<Fuel className="w-5 h-5 text-blue-600" />}
-                    >
-                        <SimpleBarChart
-                            data={monthlyStats}
-                            valueKey="litresTotal"
-                            labelKey="moisLabel"
-                            color="from-blue-400 to-cyan-500"
-                            unit="L"
-                        />
-                    </ChartCard>
-
-                    {/* Consumption per Month Chart */}
-                    <ChartCard
-                        title="Consommation moyenne par mois"
-                        subtitle="L/100km - évolution de l'efficacité"
-                        icon={<TrendingUp className="w-5 h-5 text-green-600" />}
-                    >
-                        <SimpleBarChart
-                            data={monthlyStats}
-                            valueKey="consoMoyenne"
-                            labelKey="moisLabel"
-                            color="from-green-400 to-emerald-500"
-                            unit="L/100"
-                            decimals={1}
+                            series={[
+                                {
+                                    valueKey: 'coutTotal',
+                                    label: 'Coût',
+                                    color: 'from-amber-400 to-orange-500',
+                                    unit: '€',
+                                    decimals: 2
+                                },
+                                {
+                                    valueKey: 'litresTotal',
+                                    label: 'Litres',
+                                    color: 'from-blue-400 to-cyan-500',
+                                    unit: 'L',
+                                    decimals: 1
+                                },
+                                {
+                                    valueKey: 'consoMoyenne',
+                                    label: 'Consommation',
+                                    color: 'from-green-400 to-emerald-500',
+                                    unit: 'L/100',
+                                    decimals: 1
+                                }
+                            ]}
                         />
                     </ChartCard>
 
