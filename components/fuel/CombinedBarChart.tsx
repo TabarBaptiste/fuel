@@ -42,7 +42,7 @@ export function CombinedBarChart({ data, series }: CombinedBarChartProps) {
 
                 return (
                     <div key={monthIndex} className="space-y-2">
-                        <h4 className="font-semibold text-gray-700">{label}</h4>
+                        <h4 className="font-semibold text-gray-100">{label}</h4>
                         <div className="space-y-2 pl-2">
                             {series.map((s, seriesIndex) => {
                                 const value = Number(item[s.valueKey]) || 0
@@ -53,15 +53,15 @@ export function CombinedBarChart({ data, series }: CombinedBarChartProps) {
                                 return (
                                     <div key={seriesIndex} className="space-y-1">
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-gray-600">{s.label}</span>
+                                            <span className="text-gray-300">{s.label}</span>
                                             <div className="flex items-center gap-1">
-                                                <span className="font-medium text-gray-800">
+                                                <span className="font-medium text-gray-100">
                                                     {value.toFixed(s.decimals || 0)} {s.unit}
                                                 </span>
                                                 {getTrendIcon(item, s.valueKey)}
                                             </div>
                                         </div>
-                                        <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-4 bg-gray-700 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full bg-gradient-to-r ${s.color} rounded-full transition-all duration-500`}
                                                 style={{ width: `${percentage}%` }}

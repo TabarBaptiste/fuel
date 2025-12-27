@@ -22,14 +22,14 @@ const tabs: Tab[] = [
 
 export function NavigationTabs({ activeTab, onTabChange }: NavigationTabsProps) {
     return (
-        <nav className="flex gap-2 p-1 bg-white rounded-xl shadow-sm">
+        <nav className="flex gap-2 p-1 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
             {tabs.map(({ id, label, icon: Icon }) => (
                 <button
                     key={id}
                     onClick={() => onTabChange(id)}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${activeTab === id
                             ? 'bg-indigo-600 text-white shadow-md'
-                            : 'text-gray-600 hover:bg-gray-100'
+                            : 'text-gray-300 hover:bg-gray-700'
                         }`}
                 >
                     <Icon className="w-4 h-4" />

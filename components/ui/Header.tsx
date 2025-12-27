@@ -51,7 +51,7 @@ export function Header({
 
     return (
         <>
-            <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+            <header className="bg-gray-800/95 backdrop-blur-md shadow-lg border-b border-gray-700 sticky top-0 z-50">
                 <div className="max-w-6xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -59,15 +59,15 @@ export function Header({
                                 <Fuel className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-800">Carburant</h1>
-                                <p className="text-xs text-gray-500">Suivi intelligent</p>
+                                <h1 className="text-xl font-bold text-gray-100">Carburant</h1>
+                                <p className="text-xs text-gray-400">Suivi intelligent</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={isAuthenticated ? onLogout : () => setShowLoginModal(true)}
-                                className={`p-2 rounded-lg hover:bg-gray-100 transition-colors ${
-                                    isAuthenticated ? 'text-green-600' : 'text-gray-600'
+                                className={`p-2 rounded-lg hover:bg-gray-700 transition-colors ${
+                                    isAuthenticated ? 'text-green-400' : 'text-gray-300'
                                 }`}
                                 title={isAuthenticated ? 'Se déconnecter' : 'Se connecter'}
                             >
@@ -79,17 +79,17 @@ export function Header({
                             </button>
                             <button
                                 onClick={onToggleSettings}
-                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
                             >
-                                <Settings className="w-5 h-5 text-gray-600" />
+                                <Settings className="w-5 h-5 text-gray-300" />
                             </button>
                         </div>
                     </div>
 
                     {showSettings && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-xl animate-fade-in space-y-4">
+                        <div className="mt-4 p-4 bg-gray-700/50 rounded-xl animate-fade-in space-y-4 border border-gray-600">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Capacité du réservoir (L)
                                 </label>
                                 <input
@@ -119,12 +119,12 @@ export function Header({
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Exporter les données
                                 </label>
                                 <button
                                     onClick={onExportData}
-                                    className="btn-secondary flex items-center gap-2"
+                                    className="btn-secondary flex items-center gap-2 text-gray-100"
                                 >
                                     <Download className="w-4 h-4" />
                                     Exporter en JSON
@@ -137,21 +137,21 @@ export function Header({
 
             {/* Login Modal */}
             {showLoginModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 animate-fade-in">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+                    <div className="bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 animate-fade-in border border-gray-700">
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold text-gray-800">Connexion</h2>
+                            <h2 className="text-lg font-semibold text-gray-100">Connexion</h2>
                             <button
                                 onClick={() => setShowLoginModal(false)}
-                                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="p-1 hover:bg-gray-700 rounded-lg transition-colors"
                             >
-                                <X className="w-5 h-5 text-gray-500" />
+                                <X className="w-5 h-5 text-gray-400" />
                             </button>
                         </div>
 
                         <form onSubmit={handleLogin}>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Code PIN (4 chiffres)
                                 </label>
                                 <input
@@ -169,8 +169,8 @@ export function Header({
                             </div>
 
                             {loginError && (
-                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
-                                    <p className="text-red-700 text-sm">{loginError}</p>
+                                <div className="mb-4 p-3 bg-red-900/30 border border-red-800 rounded-xl">
+                                    <p className="text-red-400 text-sm">{loginError}</p>
                                 </div>
                             )}
 
@@ -178,7 +178,7 @@ export function Header({
                                 <button
                                     type="button"
                                     onClick={() => setShowLoginModal(false)}
-                                    className="btn-secondary flex-1 order-2 sm:order-1"
+                                    className="btn-secondary flex-1 order-2 sm:order-1 bg-gray-700 hover:bg-gray-600 text-gray-200"
                                 >
                                     Annuler
                                 </button>

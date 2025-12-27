@@ -30,7 +30,7 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-gray-100 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-indigo-600" />
                 Évolution mensuelle
             </h2>
@@ -39,8 +39,8 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
                 <>
                     {/* Monthly Summary Table */}
                     <div className="card overflow-hidden">
-                        <div className="p-4 border-b border-gray-200">
-                            <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <div className="p-4 border-b border-gray-700">
+                            <h3 className="font-semibold text-gray-100 flex items-center gap-2">
                                 <Calendar className="w-5 h-5 text-indigo-600" />
                                 Résumé mensuel
                             </h3>
@@ -49,7 +49,7 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
                         {/* Desktop Table */}
                         <div className="hidden md:block overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
                                     <tr>
                                         <th className="table-header text-left">Mois</th>
                                         <th className="table-header text-right">Coût</th>
@@ -58,9 +58,9 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
                                         <th className="table-header text-right">Pleins</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody className="divide-y divide-gray-700">
                                     {[...monthlyStats].reverse().map((month) => (
-                                        <tr key={month.mois} className="hover:bg-gray-50">
+                                        <tr key={month.mois} className="hover:bg-gray-700/50">
                                             <td className="table-cell font-medium">{month.moisLabel}</td>
                                             <td className="table-cell text-right">
                                                 <div className="flex items-center justify-end gap-1">
@@ -95,9 +95,9 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
                         {/* Mobile Cards */}
                         <div className="md:hidden space-y-3 p-4">
                             {[...monthlyStats].reverse().map((month) => (
-                                <div key={month.mois} className="bg-gray-50 rounded-lg p-4">
+                                <div key={month.mois} className="bg-gray-700/50 rounded-lg p-4 border border-gray-600">
                                     <div className="flex justify-between items-center mb-3">
-                                        <h4 className="font-semibold text-gray-800">{month.moisLabel}</h4>
+                                        <h4 className="font-semibold text-gray-100">{month.moisLabel}</h4>
                                         <div className="flex items-center gap-1">
                                             <ConsumptionBadge value={month.consoMoyenne} />
                                             {getTrendIcon(month, 'consoMoyenne')}
@@ -105,23 +105,23 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
                                     </div>
                                     <div className="grid grid-cols-3 gap-3 text-sm">
                                         <div className="text-center">
-                                            <p className="text-gray-500">Coût</p>
+                                            <p className="text-gray-400">Coût</p>
                                             <div className="flex items-center justify-center gap-1">
-                                                <p className="font-semibold text-amber-600">{month.coutTotal.toFixed(2)} €</p>
+                                                <p className="font-semibold text-amber-400">{month.coutTotal.toFixed(2)} €</p>
                                                 {getTrendIcon(month, 'coutTotal')}
                                             </div>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-gray-500">Litres</p>
+                                            <p className="text-gray-400">Litres</p>
                                             <div className="flex items-center justify-center gap-1">
-                                                <p className="font-semibold text-blue-600">{month.litresTotal.toFixed(1)} L</p>
+                                                <p className="font-semibold text-blue-400">{month.litresTotal.toFixed(1)} L</p>
                                                 {getTrendIcon(month, 'litresTotal')}
                                             </div>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-gray-500">Pleins</p>
+                                            <p className="text-gray-400">Pleins</p>
                                             <div className="flex items-center justify-center gap-1">
-                                                <p className="font-semibold text-indigo-600">{month.nbPleins}</p>
+                                                <p className="font-semibold text-indigo-400">{month.nbPleins}</p>
                                                 {getTrendIcon(month, 'nbPleins')}
                                             </div>
                                         </div>

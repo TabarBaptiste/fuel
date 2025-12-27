@@ -24,7 +24,7 @@ export function MobileEntryCard({ entry, onDelete, isDeleting, isAuthenticated }
         <div className="card p-4">
             <div className="flex justify-between items-start mb-3">
                 <div>
-                    <p className="font-semibold text-gray-800">{formatDateLong(entry.date)}</p>
+                    <p className="font-semibold text-gray-100">{formatDateLong(entry.date)}</p>
                     <p className="text-sm text-gray-500">{entry.kmCompteur.toLocaleString('fr-FR')} km</p>
                 </div>
                 <button onClick={() => onDelete(entry.id)} disabled={isDeleting || !isAuthenticated} className="btn-danger">

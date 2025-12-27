@@ -45,11 +45,11 @@ export function DashboardTab({
         <div className="space-y-6 animate-fade-in">
             {/* Add Entry Form - Moved to top */}
             <div className="card p-5">
-                <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
                     <Plus className="w-5 h-5 text-indigo-600" />
                     Ajouter un plein
                 </h2>
-                
+
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <FormField label="Date">
                         <input
@@ -110,6 +110,41 @@ export function DashboardTab({
 
             {/* Key Questions Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* Question 3: Combien va me coûter un trajet ? */}
+                <div className="card p-5">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-2.5 rounded-xl text-white">
+                            <Route className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-semibold text-gray-300">Estimer un trajet</h3>
+                    </div>
+                    <div className="flex gap-3 mb-4">
+                        <input
+                            type="number"
+                            value={tripDistance}
+                            onChange={(e) => onTripDistanceChange(e.target.value)}
+                            placeholder="Distance en km"
+                            className="input-field flex-1"
+                        />
+                    </div>
+                    {tripEstimate && tripDistance && (
+                        <div className="grid grid-cols-2 gap-3 animate-fade-in">
+                            <div className="bg-green-900 rounded-xl p-3 text-center">
+                                <p className="text-2xl font-bold text-green-300">{tripEstimate.litresEstimes.toFixed(1)} L</p>
+                                <p className="text-xs text-green-400">Litres estimés</p>
+                            </div>
+                            <div className="bg-green-900 rounded-xl p-3 text-center">
+                                <p className="text-2xl font-bold text-green-300">{tripEstimate.coutEstime.toFixed(2)} €</p>
+                                <p className="text-xs text-green-400">Coût estimé</p>
+                            </div>
+                        </div>
+                    )}
+                    {!tripDistance && (
+                        <p className="text-sm text-gray-400 text-center py-4">Saisissez une distance pour voir l'estimation</p>
+                    )}
+                </div>
+
                 {/* Question 1: Combien me coûte ma voiture par mois ? */}
                 <QuestionCard
                     icon={<Wallet className="w-6 h-6" />}
@@ -132,40 +167,6 @@ export function DashboardTab({
                     mainLabel="pour 100 km"
                     subValue={`Moyenne récente (${Math.min(5, entries.length)} pleins)`}
                 />
-
-                {/* Question 3: Combien va me coûter un trajet ? */}
-                <div className="card p-5">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-2.5 rounded-xl text-white">
-                            <Route className="w-6 h-6" />
-                        </div>
-                        <h3 className="font-semibold text-gray-700">Estimer un trajet</h3>
-                    </div>
-                    <div className="flex gap-3 mb-4">
-                        <input
-                            type="number"
-                            value={tripDistance}
-                            onChange={(e) => onTripDistanceChange(e.target.value)}
-                            placeholder="Distance en km"
-                            className="input-field flex-1"
-                        />
-                    </div>
-                    {tripEstimate && tripDistance && (
-                        <div className="grid grid-cols-2 gap-3 animate-fade-in">
-                            <div className="bg-green-50 rounded-xl p-3 text-center">
-                                <p className="text-2xl font-bold text-green-700">{tripEstimate.litresEstimes.toFixed(1)} L</p>
-                                <p className="text-xs text-green-600">Litres estimés</p>
-                            </div>
-                            <div className="bg-green-50 rounded-xl p-3 text-center">
-                                <p className="text-2xl font-bold text-green-700">{tripEstimate.coutEstime.toFixed(2)} €</p>
-                                <p className="text-xs text-green-600">Coût estimé</p>
-                            </div>
-                        </div>
-                    )}
-                    {!tripDistance && (
-                        <p className="text-sm text-gray-400 text-center py-4">Saisissez une distance pour voir l'estimation</p>
-                    )}
-                </div>
 
                 {/* Question 4: Jusqu'où je peux rouler ? */}
                 <QuestionCard

@@ -17,7 +17,7 @@ interface HistoryTabProps {
 export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries, isAuthenticated }: HistoryTabProps) {
     return (
         <div className="space-y-4 animate-fade-in">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-gray-100 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-indigo-600" />
                 Historique des pleins
             </h2>
@@ -40,7 +40,7 @@ export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries, 
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                             {[...enrichedEntries].reverse().map((entry) => (
-                                <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
+                                <tr key={entry.id} className="hover:bg-gray-700/50 transition-colors">
                                     <td className="table-cell">{formatDate(entry.date)}</td>
                                     <td className="table-cell text-right">{entry.kmCompteur.toLocaleString('fr-FR')}</td>
                                     <td className="table-cell text-right font-medium">

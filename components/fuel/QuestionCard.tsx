@@ -16,10 +16,10 @@ export function QuestionCard({ icon, iconBg, question, mainValue, mainLabel, sub
                 <div className={`bg-gradient-to-br ${iconBg} p-2.5 rounded-xl text-white shadow-lg`}>
                     {icon}
                 </div>
-                <h3 className="font-medium text-gray-600 text-sm">{question}</h3>
+                <h3 className="font-medium text-gray-300 text-sm">{question}</h3>
             </div>
-            <p className="text-3xl font-bold text-gray-900">{mainValue}</p>
-            <p className="text-sm text-gray-500">{mainLabel}</p>
+            <p className="text-3xl font-bold text-gray-100">{mainValue}</p>
+            <p className="text-sm text-gray-300">{mainLabel}</p>
             <p className="text-xs text-gray-400 mt-2">{subValue}</p>
         </div>
     )
