@@ -101,7 +101,7 @@ export function calculateStats(entries: FuelEntry[], tankCapacity: number = DEFA
 }
 
 export function calculateMonthlyStats(enrichedEntries: EnrichedFuelEntry[]): MonthlyStats[] {
-  const monthlyMap = new Map<string, { coutTotal: number; litresTotal: number; consumptions: number[]; nbPleins: number }>()
+  const monthlyMap = new Map<string, { coutTotal: number; litresTotal: number; kmParcourus: number; litresAvecKm: number; nbPleins: number }>()
 
   for (const entry of enrichedEntries) {
     // Inclure toutes les entrées (avec ou sans kilométrage) pour les coûts et litres
@@ -109,7 +109,7 @@ export function calculateMonthlyStats(enrichedEntries: EnrichedFuelEntry[]): Mon
     const moisKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 
     if (!monthlyMap.has(moisKey)) {
-      monthlyMap.set(moisKey, { coutTotal: 0, litresTotal: 0, consumptions: [], nbPleins: 0 })
+      monthlyMap.set(moisKey, { coutTotal: 0, litresTotal: 0, kmParcourus: 0, litresAvecKm: 0, nbPleins: 0 })
     }
 
     const data = monthlyMap.get(moisKey)!
@@ -117,9 +117,11 @@ export function calculateMonthlyStats(enrichedEntries: EnrichedFuelEntry[]): Mon
     data.litresTotal += entry.litres
     data.nbPleins += 1
     
-    // Ajouter la consommation seulement si on a des données de kilométrage valides
+    // Ajouter km et litres seulement si on a des données de kilométrage valides
+    // Pour calculer une moyenne pondérée par km parcourus
     if (entry.kmParcourus > 0 && entry.consoL100km > 0) {
-      data.consumptions.push(entry.consoL100km)
+      data.kmParcourus += entry.kmParcourus
+      data.litresAvecKm += entry.litres
     }
   }
 
@@ -134,8 +136,9 @@ export function calculateMonthlyStats(enrichedEntries: EnrichedFuelEntry[]): Mon
         moisLabel: `${monthNames[monthIndex]} ${year}`,
         coutTotal: data.coutTotal,
         litresTotal: data.litresTotal,
-        consoMoyenne: data.consumptions.length > 0
-          ? data.consumptions.reduce((a, b) => a + b, 0) / data.consumptions.length
+        // Moyenne pondérée par km parcourus (plus précise)
+        consoMoyenne: data.kmParcourus > 0
+          ? (data.litresAvecKm / data.kmParcourus) * 100
           : 0,
         nbPleins: data.nbPleins,
       }
