@@ -33,6 +33,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     kmCompteur: '',
     litres: '',
     prixLitre: '',
+    isFullTank: true,
   })
 
   const { enrichedEntries, stats, monthlyStats } = useMemo(
@@ -111,6 +112,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
           kmCompteur: hasKilometers ? parseFloat(newEntry.kmCompteur) : 0,
           litres: parseFloat(newEntry.litres),
           prixLitre: parseFloat(newEntry.prixLitre),
+          isFullTank: newEntry.isFullTank,
         }),
       })
 
@@ -123,6 +125,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
         kmCompteur: '',
         litres: '',
         prixLitre: '',
+        isFullTank: true,
       })
     } catch (err) {
       setError('Impossible d\'ajouter l\'entrée. Veuillez réessayer.')
@@ -149,7 +152,10 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   }, [])
 
   const handleInputChange = useCallback((field: keyof NewEntryForm, value: string) => {
-    setNewEntry((prev) => ({ ...prev, [field]: value }))
+    setNewEntry((prev) => ({ 
+      ...prev, 
+      [field]: field === 'isFullTank' ? value === 'true' : value 
+    }))
     setError(null)
     if (field === 'kmCompteur') {
       setKmCompteurError(null)

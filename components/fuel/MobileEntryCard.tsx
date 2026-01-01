@@ -13,6 +13,7 @@ interface MobileEntryCardProps {
         prixLitre: number
         coutTotal: number
         consoL100km: number
+        isFullTank: boolean
     }
     onDelete: (id: number) => void
     isDeleting: boolean
@@ -26,6 +27,15 @@ export function MobileEntryCard({ entry, onDelete, isDeleting, isAuthenticated }
                 <div>
                     <p className="font-semibold text-gray-100">{formatDateLong(entry.date)}</p>
                     <p className="text-sm text-gray-500">{entry.kmCompteur.toLocaleString('fr-FR')} km</p>
+                    {entry.isFullTank ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/50 text-green-300 border border-green-700 mt-1">
+                            Plein complet
+                        </span>
+                    ) : (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-900/50 text-amber-300 border border-amber-700 mt-1">
+                            Plein partiel
+                        </span>
+                    )}
                 </div>
                 <button onClick={() => onDelete(entry.id)} disabled={isDeleting || !isAuthenticated} className="btn-danger">
                     {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : !isAuthenticated ? <span className="text-gray-400">🔒</span> : <Trash2 className="w-4 h-4" />}

@@ -21,29 +21,53 @@ export function calculateStats(entries: FuelEntry[], tankCapacity: number = DEFA
     let consoL100km = 0
     let coutPer100km = 0
 
-    if (i > 0) {
-      const prevEntry = sortedEntries[i - 1]
-      
-      // Seulement calculer kmParcourus si les deux entrées ont un kilométrage
-      if (entry.kmCompteur > 0 && prevEntry.kmCompteur > 0) {
-        kmParcourus = entry.kmCompteur - prevEntry.kmCompteur
+    // Calculer la consommation seulement si c'est un plein complet
+    if (entry.isFullTank && entry.kmCompteur > 0) {
+      // Trouver le dernier plein complet avant celui-ci
+      let lastFullTankIndex = -1
+      for (let j = i - 1; j >= 0; j--) {
+        if (sortedEntries[j].isFullTank && sortedEntries[j].kmCompteur > 0) {
+          lastFullTankIndex = j
+          break
+        }
+      }
+
+      if (lastFullTankIndex >= 0) {
+        const lastFullTank = sortedEntries[lastFullTankIndex]
+        kmParcourus = entry.kmCompteur - lastFullTank.kmCompteur
         
-        if (kmParcourus > 0) {
-          consoL100km = (entry.litres / kmParcourus) * 100
-          coutPer100km = (coutTotal / kmParcourus) * 100
-          consumptions.push(consoL100km)
+        // Calculer la consommation avec la somme de tous les litres entre les deux pleins complets
+        let litresConsommes = entry.litres
+        for (let j = lastFullTankIndex + 1; j < i; j++) {
+          litresConsommes += sortedEntries[j].litres
         }
         
-        totalKm += kmParcourus
+        if (kmParcourus > 0) {
+          consoL100km = (litresConsommes / kmParcourus) * 100
+          
+          // Calculer le coût total pour cette période
+          let coutPeriode = coutTotal
+          for (let j = lastFullTankIndex + 1; j < i; j++) {
+            coutPeriode += sortedEntries[j].litres * sortedEntries[j].prixLitre
+          }
+          coutPer100km = (coutPeriode / kmParcourus) * 100
+          
+          consumptions.push(consoL100km)
+          totalKm += kmParcourus
+        }
       }
-      
-      totalLitres += entry.litres
-      totalCout += coutTotal
-    } else {
-      // Première entrée : ajouter au total même sans km parcourus
-      totalLitres += entry.litres
-      totalCout += coutTotal
+    } else if (i > 0 && entry.kmCompteur > 0) {
+      // Pour les pleins non complets, afficher les km parcourus depuis la dernière entrée
+      // mais ne pas calculer la consommation
+      const prevEntry = sortedEntries[i - 1]
+      if (prevEntry.kmCompteur > 0) {
+        kmParcourus = entry.kmCompteur - prevEntry.kmCompteur
+      }
     }
+    
+    // Ajouter au total pour tous les pleins
+    totalLitres += entry.litres
+    totalCout += coutTotal
 
     enrichedEntries.push({
       ...entry,

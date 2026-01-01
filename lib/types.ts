@@ -4,6 +4,7 @@ export interface FuelEntry {
   kmCompteur: number
   litres: number
   prixLitre: number
+  isFullTank: boolean
 }
 
 export interface EnrichedFuelEntry extends FuelEntry {
@@ -46,6 +47,7 @@ export interface NewEntryForm {
   kmCompteur: string
   litres: string
   prixLitre: string
+  isFullTank: boolean
 }
 
 export interface TripEstimate {

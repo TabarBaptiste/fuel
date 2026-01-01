@@ -34,6 +34,7 @@ export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries, 
                                 <th className="table-header text-right">Litres</th>
                                 <th className="table-header text-right">Prix/L</th>
                                 <th className="table-header text-right">Coût</th>
+                                <th className="table-header text-center">Type</th>
                                 <th className="table-header text-right">L/100km</th>
                                 <th className="table-header text-center">Action</th>
                             </tr>
@@ -50,6 +51,17 @@ export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries, 
                                     <td className="table-cell text-right">{entry.prixLitre.toFixed(3)} €</td>
                                     <td className="table-cell text-right font-medium">
                                         {entry.coutTotal > 0 ? `${entry.coutTotal.toFixed(2)} €` : '-'}
+                                    </td>
+                                    <td className="table-cell text-center">
+                                        {entry.isFullTank ? (
+                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/50 text-green-300 border border-green-700">
+                                                Plein
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-900/50 text-amber-300 border border-amber-700">
+                                                Partiel
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="table-cell text-right">
                                         <ConsumptionBadge value={entry.consoL100km} />
