@@ -15,6 +15,7 @@ interface DashboardTabProps {
     fullTankCost: number
     newEntry: NewEntryForm
     onInputChange: (field: keyof NewEntryForm, value: string) => void
+    onCheckboxChange: (field: keyof NewEntryForm, value: boolean) => void
     onKeyPress: (e: React.KeyboardEvent) => void
     isLoading: boolean
     onAddEntry: () => void
@@ -32,6 +33,7 @@ export function DashboardTab({
     fullTankCost,
     newEntry,
     onInputChange,
+    onCheckboxChange,
     onKeyPress,
     isLoading,
     onAddEntry,
@@ -99,7 +101,7 @@ export function DashboardTab({
                         <input
                             type="checkbox"
                             checked={newEntry.isFullTank}
-                            onChange={(e) => onInputChange('isFullTank', e.target.checked.toString())}
+                            onChange={(e) => onCheckboxChange('isFullTank', e.target.checked)}
                             className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-800"
                         />
                         <span>Plein complet (réservoir rempli)</span>

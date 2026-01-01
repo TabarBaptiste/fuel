@@ -37,19 +37,14 @@ export function calculateStats(entries: FuelEntry[], tankCapacity: number = DEFA
         kmParcourus = entry.kmCompteur - lastFullTank.kmCompteur
         
         // Calculer la consommation avec la somme de tous les litres entre les deux pleins complets
-        let litresConsommes = entry.litres
-        for (let j = lastFullTankIndex + 1; j < i; j++) {
-          litresConsommes += sortedEntries[j].litres
-        }
+        const entriesBetween = sortedEntries.slice(lastFullTankIndex + 1, i + 1)
+        const litresConsommes = entriesBetween.reduce((sum, e) => sum + e.litres, 0)
         
         if (kmParcourus > 0) {
           consoL100km = (litresConsommes / kmParcourus) * 100
           
           // Calculer le coût total pour cette période
-          let coutPeriode = coutTotal
-          for (let j = lastFullTankIndex + 1; j < i; j++) {
-            coutPeriode += sortedEntries[j].litres * sortedEntries[j].prixLitre
-          }
+          const coutPeriode = entriesBetween.reduce((sum, e) => sum + (e.litres * e.prixLitre), 0)
           coutPer100km = (coutPeriode / kmParcourus) * 100
           
           consumptions.push(consoL100km)

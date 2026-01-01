@@ -152,14 +152,16 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   }, [])
 
   const handleInputChange = useCallback((field: keyof NewEntryForm, value: string) => {
-    setNewEntry((prev) => ({ 
-      ...prev, 
-      [field]: field === 'isFullTank' ? value === 'true' : value 
-    }))
+    setNewEntry((prev) => ({ ...prev, [field]: value }))
     setError(null)
     if (field === 'kmCompteur') {
       setKmCompteurError(null)
     }
+  }, [])
+
+  const handleCheckboxChange = useCallback((field: keyof NewEntryForm, value: boolean) => {
+    setNewEntry((prev) => ({ ...prev, [field]: value }))
+    setError(null)
   }, [])
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
@@ -288,6 +290,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
             fullTankCost={fullTankCost}
             newEntry={newEntry}
             onInputChange={handleInputChange}
+            onCheckboxChange={handleCheckboxChange}
             onKeyPress={handleKeyPress}
             isLoading={isLoading}
             onAddEntry={addEntry}
