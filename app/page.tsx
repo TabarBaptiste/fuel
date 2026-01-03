@@ -13,6 +13,7 @@ async function getEntries(): Promise<FuelEntry[]> {
     kmCompteur: entry.kmCompteur,
     litres: entry.litres,
     prixLitre: entry.prixLitre,
+    isFullTank: entry.isFullTank,
   }))
 }
 

@@ -33,6 +33,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     kmCompteur: '',
     litres: '',
     prixLitre: '',
+    isFullTank: true,
   })
 
   const { enrichedEntries, stats, monthlyStats } = useMemo(
@@ -111,6 +112,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
           kmCompteur: hasKilometers ? parseFloat(newEntry.kmCompteur) : 0,
           litres: parseFloat(newEntry.litres),
           prixLitre: parseFloat(newEntry.prixLitre),
+          isFullTank: newEntry.isFullTank,
         }),
       })
 
@@ -123,6 +125,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
         kmCompteur: '',
         litres: '',
         prixLitre: '',
+        isFullTank: true,
       })
     } catch (err) {
       setError('Impossible d\'ajouter l\'entrée. Veuillez réessayer.')
@@ -154,6 +157,11 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     if (field === 'kmCompteur') {
       setKmCompteurError(null)
     }
+  }, [])
+
+  const handleCheckboxChange = useCallback((field: keyof NewEntryForm, value: boolean) => {
+    setNewEntry((prev) => ({ ...prev, [field]: value }))
+    setError(null)
   }, [])
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
@@ -282,6 +290,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
             fullTankCost={fullTankCost}
             newEntry={newEntry}
             onInputChange={handleInputChange}
+            onCheckboxChange={handleCheckboxChange}
             onKeyPress={handleKeyPress}
             isLoading={isLoading}
             onAddEntry={addEntry}

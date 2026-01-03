@@ -13,6 +13,7 @@ model FuelEntry {
   kmCompteur Float
   litres     Float
   prixLitre  Float
+  isFullTank Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

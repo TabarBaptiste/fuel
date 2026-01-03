@@ -14,6 +14,7 @@ export async function GET() {
       kmCompteur: entry.kmCompteur,
       litres: entry.litres,
       prixLitre: entry.prixLitre,
+      isFullTank: entry.isFullTank,
     }))
 
     return NextResponse.json(formattedEntries)
@@ -30,7 +31,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { date, kmCompteur, litres, prixLitre } = body
+    const { date, kmCompteur, litres, prixLitre, isFullTank } = body
 
     // Validation
     if (!date || kmCompteur === undefined || litres === undefined || prixLitre === undefined) {
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
         kmCompteur: parseFloat(kmCompteur),
         litres: parseFloat(litres),
         prixLitre: parseFloat(prixLitre),
+        isFullTank: isFullTank !== undefined ? isFullTank : true,
       },
     })
 
@@ -55,6 +57,7 @@ export async function POST(request: NextRequest) {
       kmCompteur: entry.kmCompteur,
       litres: entry.litres,
       prixLitre: entry.prixLitre,
+      isFullTank: entry.isFullTank,
     }, { status: 201 })
   } catch (error) {
     console.error('Erreur POST /api/entries:', error)
