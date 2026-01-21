@@ -20,9 +20,9 @@ export function ChartsTab({ monthlyStats }: ChartsTabProps) {
         const previousValue = Number(previousItem[valueKey]) || 0
 
         if (currentValue > previousValue) {
-            return <TrendingUp className="w-4 h-4 text-green-500" />
+            return <TrendingUp className="w-4 h-4 text-red-500" />
         } else if (currentValue < previousValue) {
-            return <TrendingDown className="w-4 h-4 text-red-500" />
+            return <TrendingDown className="w-4 h-4 text-green-500" />
         } else {
             return <Minus className="w-4 h-4 text-gray-500" />
         }

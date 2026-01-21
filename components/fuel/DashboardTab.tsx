@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Wallet, Droplets, Route, Car, Plus, Loader2 } from 'lucide-react'
 import { QuestionCard } from './QuestionCard'
 import { FormField } from './FormField'
@@ -42,6 +42,17 @@ export function DashboardTab({
 }: DashboardTabProps) {
     // Récupérer les dernières valeurs pour les placeholders
     const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null
+
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const prevIsLoading = useRef(isLoading);
+
+    useEffect(() => {
+        if (prevIsLoading.current && !isLoading) {
+            setSuccessMessage("Plein ajouté avec succès !");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        }
+        prevIsLoading.current = isLoading;
+    }, [isLoading]);
 
     return (
         <div className="space-y-6 animate-fade-in">
@@ -107,7 +118,7 @@ export function DashboardTab({
                         <span>Plein complet (réservoir rempli)</span>
                     </label>
                     <p className="text-xs text-gray-500 mt-1 ml-6">
-                        Cochez cette case uniquement si vous avez fait le plein complet. Les calculs de consommation sont plus précis avec les pleins complets.
+                        Cochez cette case uniquement si vous avez fait le plein complet.
                     </p>
                 </div>
                 <button
@@ -123,6 +134,11 @@ export function DashboardTab({
                         <><Plus className="w-5 h-5" /> Ajouter le plein</>
                     )}
                 </button>
+                {successMessage && (
+                    <div className="mt-4 p-3 bg-green-800 text-green-200 rounded-lg">
+                        {successMessage}
+                    </div>
+                )}
             </div>
 
             {/* Key Questions Cards */}
