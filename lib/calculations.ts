@@ -165,6 +165,43 @@ export function calculateMonthlyStats(enrichedEntries: EnrichedFuelEntry[]): Mon
     .sort((a, b) => a.mois.localeCompare(b.mois))
 }
 
+/**
+ * Valide un kilométrage en fonction de la date de la saisie.
+ * Le compteur doit être croissant dans le temps : supérieur à toute saisie
+ * antérieure et inférieur à toute saisie postérieure.
+ * Retourne un message d'erreur, ou null si le kilométrage est valide.
+ */
+export function validateKmCompteur(
+  entries: FuelEntry[],
+  dateStr: string,
+  km: number,
+  excludeId?: number
+): string | null {
+  const date = new Date(dateStr).getTime()
+  const relevant = entries.filter(
+    (e) => e.kmCompteur > 0 && e.id !== excludeId
+  )
+
+  const before = relevant.filter((e) => new Date(e.date).getTime() < date)
+  const after = relevant.filter((e) => new Date(e.date).getTime() > date)
+
+  const maxBefore = before.length > 0
+    ? Math.max(...before.map((e) => e.kmCompteur))
+    : null
+  const minAfter = after.length > 0
+    ? Math.min(...after.map((e) => e.kmCompteur))
+    : null
+
+  if (maxBefore !== null && km <= maxBefore) {
+    return `Le kilométrage doit être supérieur à ${maxBefore.toLocaleString('fr-FR')} km (relevé d'une date antérieure)`
+  }
+  if (minAfter !== null && km >= minAfter) {
+    return `Le kilométrage doit être inférieur à ${minAfter.toLocaleString('fr-FR')} km (relevé d'une date postérieure)`
+  }
+
+  return null
+}
+
 export function estimateTrip(distance: number, consoMoyenne: number, prixLitre: number): TripEstimate {
   const litresEstimes = (distance * consoMoyenne) / 100
   const coutEstime = litresEstimes * prixLitre

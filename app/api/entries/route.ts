@@ -68,6 +68,48 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// PUT - Modifier une entrée existante
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { id, date, kmCompteur, litres, prixLitre, isFullTank } = body
+
+    // Validation
+    if (id === undefined || !date || kmCompteur === undefined || litres === undefined || prixLitre === undefined) {
+      return NextResponse.json(
+        { error: 'Tous les champs sont requis' },
+        { status: 400 }
+      )
+    }
+
+    const entry = await prisma.fuelEntry.update({
+      where: { id: parseInt(id) },
+      data: {
+        date: new Date(date),
+        kmCompteur: parseFloat(kmCompteur),
+        litres: parseFloat(litres),
+        prixLitre: parseFloat(prixLitre),
+        isFullTank: isFullTank !== undefined ? isFullTank : true,
+      },
+    })
+
+    return NextResponse.json({
+      id: entry.id,
+      date: entry.date.toISOString().split('T')[0],
+      kmCompteur: entry.kmCompteur,
+      litres: entry.litres,
+      prixLitre: entry.prixLitre,
+      isFullTank: entry.isFullTank,
+    })
+  } catch (error) {
+    console.error('Erreur PUT /api/entries:', error)
+    return NextResponse.json(
+      { error: 'Erreur lors de la modification de l\'entrée' },
+      { status: 500 }
+    )
+  }
+}
+
 // DELETE - Supprimer une entrée
 export async function DELETE(request: NextRequest) {
   try {
