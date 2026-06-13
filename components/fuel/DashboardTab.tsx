@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Wallet, Droplets, Route, Car, Plus, Loader2 } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Wallet, Droplets, Route, Car, Plus, Loader2, Pencil, X } from 'lucide-react'
 import { QuestionCard } from './QuestionCard'
 import { FormField } from './FormField'
 import { MiniStat } from './MiniStat'
@@ -21,6 +21,9 @@ interface DashboardTabProps {
     onAddEntry: () => void
     isAuthenticated: boolean
     kmCompteurError?: string | null
+    isEditing?: boolean
+    onCancelEdit?: () => void
+    successSignal?: number
 }
 
 export function DashboardTab({
@@ -39,28 +42,33 @@ export function DashboardTab({
     onAddEntry,
     isAuthenticated,
     kmCompteurError,
+    isEditing = false,
+    onCancelEdit,
+    successSignal = 0,
 }: DashboardTabProps) {
     // Récupérer les dernières valeurs pour les placeholders
     const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null
 
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
-    const prevIsLoading = useRef(isLoading);
 
     useEffect(() => {
-        if (prevIsLoading.current && !isLoading) {
-            setSuccessMessage("Plein ajouté avec succès !");
-            setTimeout(() => setSuccessMessage(null), 3000);
-        }
-        prevIsLoading.current = isLoading;
-    }, [isLoading]);
+        // Ne s'affiche que lorsqu'une saisie a réellement été enregistrée
+        if (successSignal === 0) return;
+        setSuccessMessage("Saisie enregistrée avec succès !");
+        const timer = setTimeout(() => setSuccessMessage(null), 3000);
+        return () => clearTimeout(timer);
+    }, [successSignal]);
 
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Add Entry Form - Moved to top */}
             <div className="card p-5">
                 <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
-                    <Plus className="w-5 h-5 text-indigo-600" />
-                    Ajouter un plein
+                    {isEditing ? (
+                        <><Pencil className="w-5 h-5 text-indigo-600" /> Modifier la saisie</>
+                    ) : (
+                        <><Plus className="w-5 h-5 text-indigo-600" /> Ajouter un plein</>
+                    )}
                 </h2>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -121,19 +129,32 @@ export function DashboardTab({
                         Cochez cette case uniquement si vous avez fait le plein complet.
                     </p>
                 </div>
-                <button
-                    onClick={onAddEntry}
-                    disabled={isLoading || !isAuthenticated}
-                    className="btn-primary mt-4 w-full flex items-center justify-center gap-2"
-                >
-                    {isLoading ? (
-                        <><Loader2 className="w-5 h-5 animate-spin" /> Ajout en cours...</>
-                    ) : !isAuthenticated ? (
-                        <><Plus className="w-5 h-5" /> Connexion requise</>
-                    ) : (
-                        <><Plus className="w-5 h-5" /> Ajouter le plein</>
+                <div className="mt-4 flex gap-2">
+                    <button
+                        onClick={onAddEntry}
+                        disabled={isLoading || !isAuthenticated}
+                        className="btn-primary flex-1 flex items-center justify-center gap-2"
+                    >
+                        {isLoading ? (
+                            <><Loader2 className="w-5 h-5 animate-spin" /> {isEditing ? 'Modification...' : 'Ajout en cours...'}</>
+                        ) : !isAuthenticated ? (
+                            <><Plus className="w-5 h-5" /> Connexion requise</>
+                        ) : isEditing ? (
+                            <><Pencil className="w-5 h-5" /> Enregistrer les modifications</>
+                        ) : (
+                            <><Plus className="w-5 h-5" /> Ajouter le plein</>
+                        )}
+                    </button>
+                    {isEditing && (
+                        <button
+                            onClick={onCancelEdit}
+                            disabled={isLoading}
+                            className="btn-secondary flex items-center justify-center gap-2 px-4"
+                        >
+                            <X className="w-5 h-5" /> Annuler
+                        </button>
                     )}
-                </button>
+                </div>
                 {successMessage && (
                     <div className="mt-4 p-3 bg-green-800 text-green-200 rounded-lg">
                         {successMessage}
@@ -219,7 +240,7 @@ export function DashboardTab({
                 <MiniStat label="Coût/100km" value={`${stats.coutMoyenPer100km.toFixed(2)} €`} />
                 <MiniStat label="Prix moyen/L" value={`${stats.prixMoyenLitreRecent.toFixed(3)} €`} />
                 <MiniStat label="Total parcouru" value={`${stats.totalKm.toLocaleString('fr-FR')} km`} />
-                <MiniStat label="Nombre de pleins" value={`${Math.max(0, entries.length - 1)}`} />
+                <MiniStat label="Nombre de pleins" value={`${entries.length}`} />
             </div>
         </div>
     )

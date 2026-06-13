@@ -1,20 +1,21 @@
 import React from 'react'
-import { Calendar, Loader2, Trash2 } from 'lucide-react'
+import { Calendar, Loader2, Pencil, Trash2 } from 'lucide-react'
 import { formatDate } from '@/lib/utils/dateFormat'
 import { ConsumptionBadge } from './ConsumptionBadge'
 import { MobileEntryCard } from './MobileEntryCard'
 import { EmptyState } from './EmptyState'
-import { EnrichedFuelEntry } from '@/lib/types'
+import { EnrichedFuelEntry, FuelEntry } from '@/lib/types'
 
 interface HistoryTabProps {
     enrichedEntries: EnrichedFuelEntry[]
     onDelete: (id: number) => void
+    onEdit: (entry: FuelEntry) => void
     deletingId: number | null
     hasEntries: boolean
     isAuthenticated: boolean
 }
 
-export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries, isAuthenticated }: HistoryTabProps) {
+export function HistoryTab({ enrichedEntries, onDelete, onEdit, deletingId, hasEntries, isAuthenticated }: HistoryTabProps) {
     return (
         <div className="space-y-4 animate-fade-in">
             <h2 className="text-lg font-bold text-gray-100 flex items-center gap-2">
@@ -43,7 +44,7 @@ export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries, 
                             {[...enrichedEntries].reverse().map((entry) => (
                                 <tr key={entry.id} className="hover:bg-gray-700/50 transition-colors">
                                     <td className="table-cell">{formatDate(entry.date)}</td>
-                                    <td className="table-cell text-right">{entry.kmCompteur.toLocaleString('fr-FR')}</td>
+                                    <td className="table-cell text-right">{entry.kmCompteur > 0 ? entry.kmCompteur.toLocaleString('fr-FR') : '-'}</td>
                                     <td className="table-cell text-right font-medium">
                                         {entry.kmParcourus > 0 ? `${entry.kmParcourus} km` : '-'}
                                     </td>
@@ -67,19 +68,34 @@ export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries, 
                                         <ConsumptionBadge value={entry.consoL100km} />
                                     </td>
                                     <td className="table-cell text-center">
-                                        <button
-                                            onClick={() => onDelete(entry.id)}
-                                            disabled={deletingId === entry.id || !isAuthenticated}
-                                            className="btn-danger"
-                                        >
-                                            {deletingId === entry.id ? (
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                            ) : !isAuthenticated ? (
-                                                <span className="text-gray-400">🔒</span>
-                                            ) : (
-                                                <Trash2 className="w-4 h-4" />
-                                            )}
-                                        </button>
+                                        <div className="flex items-center justify-center gap-1">
+                                            <button
+                                                onClick={() => onEdit(entry)}
+                                                disabled={!isAuthenticated}
+                                                className="text-indigo-400 hover:text-indigo-300 hover:bg-indigo-900/20 p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Modifier"
+                                            >
+                                                {!isAuthenticated ? (
+                                                    <span className="text-gray-400">🔒</span>
+                                                ) : (
+                                                    <Pencil className="w-4 h-4" />
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={() => onDelete(entry.id)}
+                                                disabled={deletingId === entry.id || !isAuthenticated}
+                                                className="btn-danger"
+                                                title="Supprimer"
+                                            >
+                                                {deletingId === entry.id ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : !isAuthenticated ? (
+                                                    <span className="text-gray-400">🔒</span>
+                                                ) : (
+                                                    <Trash2 className="w-4 h-4" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -95,6 +111,7 @@ export function HistoryTab({ enrichedEntries, onDelete, deletingId, hasEntries, 
                         key={entry.id}
                         entry={entry}
                         onDelete={onDelete}
+                        onEdit={onEdit}
                         isDeleting={deletingId === entry.id}
                         isAuthenticated={isAuthenticated}
                     />

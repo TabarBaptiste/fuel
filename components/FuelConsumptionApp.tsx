@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { AlertCircle, Fuel, Loader2, Trash2 } from 'lucide-react'
 import { FuelEntry, NewEntryForm } from '@/lib/types'
-import { calculateStats, estimateTrip, estimateFullTankCost, DEFAULT_TANK_CAPACITY } from '@/lib/calculations'
+import { calculateStats, estimateTrip, estimateFullTankCost, validateKmCompteur, DEFAULT_TANK_CAPACITY } from '@/lib/calculations'
 import { Header } from '@/components/ui/Header'
 import { NavigationTabs } from '@/components/ui/NavigationTabs'
 import { DashboardTab } from '@/components/fuel/DashboardTab'
@@ -27,6 +27,8 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loginLoading, setLoginLoading] = useState(false)
   const [kmCompteurError, setKmCompteurError] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [successSignal, setSuccessSignal] = useState(0)
 
   const [newEntry, setNewEntry] = useState<NewEntryForm>({
     date: new Date().toISOString().split('T')[0],
@@ -76,6 +78,19 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     }
   }, [])
 
+  const resetForm = useCallback(() => {
+    setNewEntry({
+      date: new Date().toISOString().split('T')[0],
+      kmCompteur: '',
+      litres: '',
+      prixLitre: '',
+      isFullTank: true,
+    })
+    setEditingId(null)
+    setKmCompteurError(null)
+    setError(null)
+  }, [])
+
   const addEntry = useCallback(async () => {
     if (!newEntry.litres || !newEntry.prixLitre) {
       setError('Veuillez remplir tous les champs requis')
@@ -85,16 +100,18 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     // Déterminer automatiquement le mode selon si kmCompteur est rempli
     const hasKilometers = newEntry.kmCompteur && newEntry.kmCompteur.trim() !== ''
 
-    // Validation : vérifier que le km compteur est supérieur au dernier enregistré (seulement si rempli)
+    // Validation : le kilométrage doit être cohérent avec la date de la saisie
+    // (supérieur aux relevés antérieurs, inférieur aux relevés postérieurs)
     if (hasKilometers) {
-      const entriesWithKm = entries.filter(entry => entry.kmCompteur > 0)
-      const lastKmCompteur = entriesWithKm.length > 0
-        ? Math.max(...entriesWithKm.map(entry => entry.kmCompteur))
-        : 0
-
       const currentKmCompteur = parseFloat(newEntry.kmCompteur)
-      if (currentKmCompteur <= lastKmCompteur) {
-        setKmCompteurError(`Le kilométrage doit être supérieur au dernier relevé (${lastKmCompteur.toLocaleString('fr-FR')} km)`)
+      const kmError = validateKmCompteur(
+        entries,
+        newEntry.date,
+        currentKmCompteur,
+        editingId ?? undefined
+      )
+      if (kmError) {
+        setKmCompteurError(kmError)
         return
       }
     }
@@ -103,37 +120,74 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     setError(null)
     setKmCompteurError(null)
 
+    const payload = {
+      date: newEntry.date,
+      kmCompteur: hasKilometers ? parseFloat(newEntry.kmCompteur) : 0,
+      litres: parseFloat(newEntry.litres),
+      prixLitre: parseFloat(newEntry.prixLitre),
+      isFullTank: newEntry.isFullTank,
+    }
+
     try {
-      const response = await fetch('/api/entries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: newEntry.date,
-          kmCompteur: hasKilometers ? parseFloat(newEntry.kmCompteur) : 0,
-          litres: parseFloat(newEntry.litres),
-          prixLitre: parseFloat(newEntry.prixLitre),
-          isFullTank: newEntry.isFullTank,
-        }),
-      })
+      if (editingId !== null) {
+        const response = await fetch('/api/entries', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingId, ...payload }),
+        })
 
-      if (!response.ok) throw new Error('Erreur lors de l\'ajout')
+        if (!response.ok) throw new Error('Erreur lors de la modification')
 
-      const entry = await response.json()
-      setEntries((prev) => [...prev, entry])
-      setNewEntry({
-        date: new Date().toISOString().split('T')[0],
-        kmCompteur: '',
-        litres: '',
-        prixLitre: '',
-        isFullTank: true,
-      })
+        const updated = await response.json()
+        setEntries((prev) => prev.map((e) => (e.id === updated.id ? updated : e)))
+        resetForm()
+        setSuccessSignal((s) => s + 1)
+      } else {
+        const response = await fetch('/api/entries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+
+        if (!response.ok) throw new Error('Erreur lors de l\'ajout')
+
+        const entry = await response.json()
+        setEntries((prev) => [...prev, entry])
+        resetForm()
+        setSuccessSignal((s) => s + 1)
+      }
     } catch (err) {
-      setError('Impossible d\'ajouter l\'entrée. Veuillez réessayer.')
+      setError(
+        editingId !== null
+          ? 'Impossible de modifier l\'entrée. Veuillez réessayer.'
+          : 'Impossible d\'ajouter l\'entrée. Veuillez réessayer.'
+      )
       console.error(err)
     } finally {
       setIsLoading(false)
     }
-  }, [newEntry, entries])
+  }, [newEntry, entries, editingId, resetForm])
+
+  const startEdit = useCallback((entry: FuelEntry) => {
+    setEditingId(entry.id)
+    setNewEntry({
+      date: entry.date,
+      kmCompteur: entry.kmCompteur > 0 ? entry.kmCompteur.toString() : '',
+      litres: entry.litres.toString(),
+      prixLitre: entry.prixLitre.toString(),
+      isFullTank: entry.isFullTank,
+    })
+    setKmCompteurError(null)
+    setError(null)
+    setActiveTab('dashboard')
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [])
+
+  const cancelEdit = useCallback(() => {
+    resetForm()
+  }, [resetForm])
 
   const deleteEntry = useCallback(async (id: number) => {
     setDeletingId(id)
@@ -296,6 +350,9 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
             onAddEntry={addEntry}
             isAuthenticated={isAuthenticated}
             kmCompteurError={kmCompteurError}
+            isEditing={editingId !== null}
+            onCancelEdit={cancelEdit}
+            successSignal={successSignal}
           />
         )}
 
@@ -303,6 +360,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
           <HistoryTab
             enrichedEntries={enrichedEntries}
             onDelete={deleteEntry}
+            onEdit={startEdit}
             deletingId={deletingId}
             hasEntries={entries.length > 0}
             isAuthenticated={isAuthenticated}
