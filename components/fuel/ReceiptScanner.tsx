@@ -4,95 +4,31 @@ import React, { useState, useRef, useCallback } from 'react'
 import { Camera, X, Loader2, Check, AlertTriangle, RotateCcw, ScanLine } from 'lucide-react'
 
 interface ScanResult {
-  date?: string
-  litres?: string
-  prixLitre?: string
+  date?: string | null
+  litres?: string | null
+  prixLitre?: string | null
+  carburant?: string | null
+  montantTotal?: string | null
 }
 
 interface ReceiptScannerProps {
-  onScanComplete: (data: ScanResult) => void
+  onScanComplete: (data: { date?: string; litres?: string; prixLitre?: string }) => void
   disabled?: boolean
-}
-
-/**
- * Parse le texte OCR d'un ticket de station-service pour extraire
- * la date, la quantité de litres et le prix unitaire.
- */
-function parseReceiptText(text: string): ScanResult {
-  const result: ScanResult = {}
-
-  // Normaliser le texte : remplacer les sauts de ligne multiples, unifier les espaces
-  const normalizedText = text
-    .replace(/\r\n/g, '\n')
-    .replace(/\n+/g, '\n')
-
-  const lines = normalizedText.split('\n').map(l => l.trim()).filter(Boolean)
-  const fullText = lines.join(' ')
-
-  // === DATE ===
-  // Format ticket: "LE 19-11-25 A 12-33-47" → 2025-11-19
-  // Aussi : "LE 08-06-26 A 18-55-32" → 2026-06-08
-  const dateMatch = fullText.match(/LE\s+(\d{2})[.\-/](\d{2})[.\-/](\d{2})\s+[AÀa]/i)
-  if (dateMatch) {
-    const [, day, month, year] = dateMatch
-    const fullYear = parseInt(year) > 50 ? `19${year}` : `20${year}`
-    result.date = `${fullYear}-${month}-${day}`
-  }
-
-  // === QUANTITÉ (LITRES) ===
-  // "Quantite = 40,38 L" ou "Quantité = 15,18 L"
-  // Aussi : "Quantite  40,38  L" (sans signe =)
-  const quantityMatch = fullText.match(/Quantit[eéè]\s*=?\s*([\d]+[.,]\d+)\s*L/i)
-  if (quantityMatch) {
-    result.litres = quantityMatch[1].replace(',', '.')
-  }
-
-  // === PRIX UNITAIRE ===
-  // "Prix unit. = 1,739 EUR" ou "Prix unit.  1,970 EUR"
-  const priceMatch = fullText.match(/Prix\s*unit[.\s]*=?\s*([\d]+[.,]\d+)/i)
-  if (priceMatch) {
-    result.prixLitre = priceMatch[1].replace(',', '.')
-  }
-
-  // === FALLBACKS si les regex principales n'ont rien trouvé ===
-
-  // Fallback litres : chercher un pattern "XX,XX L" isolé (pas dans MONTANT)
-  if (!result.litres) {
-    const fallbackLitres = fullText.match(/(\d{1,3}[.,]\d{1,2})\s*L(?:\s|$|[^a-zA-Z])/i)
-    if (fallbackLitres) {
-      result.litres = fallbackLitres[1].replace(',', '.')
-    }
-  }
-
-  // Fallback prix : chercher un pattern "X,XXX" suivi de EUR
-  if (!result.prixLitre) {
-    const fallbackPrice = fullText.match(/(\d[.,]\d{3})\s*(?:EUR|€)/i)
-    if (fallbackPrice) {
-      result.prixLitre = fallbackPrice[1].replace(',', '.')
-    }
-  }
-
-  return result
 }
 
 export function ReceiptScanner({ onScanComplete, disabled = false }: ReceiptScannerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [imageMimeType, setImageMimeType] = useState<string>('image/jpeg')
   const [isProcessing, setIsProcessing] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [progressLabel, setProgressLabel] = useState('')
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
-  const [rawText, setRawText] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const resetState = useCallback(() => {
     setSelectedImage(null)
     setIsProcessing(false)
-    setProgress(0)
-    setProgressLabel('')
     setScanResult(null)
-    setRawText(null)
     setError(null)
   }, [])
 
@@ -105,17 +41,17 @@ export function ReceiptScanner({ onScanComplete, disabled = false }: ReceiptScan
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Vérifier que c'est une image
     if (!file.type.startsWith('image/')) {
       setError('Veuillez sélectionner une image')
       return
     }
 
-    // Limiter la taille (10 MB max)
     if (file.size > 10 * 1024 * 1024) {
       setError('L\'image est trop volumineuse (max 10 MB)')
       return
     }
+
+    setImageMimeType(file.type)
 
     const reader = new FileReader()
     reader.onload = (event) => {
@@ -123,11 +59,9 @@ export function ReceiptScanner({ onScanComplete, disabled = false }: ReceiptScan
       setIsModalOpen(true)
       setError(null)
       setScanResult(null)
-      setRawText(null)
     }
     reader.readAsDataURL(file)
 
-    // Reset le input pour permettre de re-sélectionner le même fichier
     e.target.value = ''
   }, [])
 
@@ -135,55 +69,47 @@ export function ReceiptScanner({ onScanComplete, disabled = false }: ReceiptScan
     if (!selectedImage) return
 
     setIsProcessing(true)
-    setProgress(0)
-    setProgressLabel('Initialisation...')
     setError(null)
 
     try {
-      const Tesseract = await import('tesseract.js')
+      const response = await fetch('/api/scan-receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: selectedImage,
+          mimeType: imageMimeType,
+        }),
+      })
 
-      const result = await Tesseract.recognize(
-        selectedImage,
-        'fra', // Langue française
-        {
-          logger: (m: { status: string; progress: number }) => {
-            if (m.status === 'recognizing text') {
-              setProgress(Math.round(m.progress * 100))
-              setProgressLabel('Analyse en cours...')
-            } else if (m.status === 'loading tesseract core') {
-              setProgressLabel('Chargement du moteur OCR...')
-            } else if (m.status === 'initializing tesseract') {
-              setProgressLabel('Initialisation...')
-            } else if (m.status === 'loading language traineddata') {
-              setProgressLabel('Chargement du français...')
-            } else if (m.status === 'initializing api') {
-              setProgressLabel('Préparation...')
-            }
-          },
-        }
-      )
+      const data = await response.json()
 
-      const text = result.data.text
-      setRawText(text)
+      if (!response.ok) {
+        setError(data.error || 'Erreur lors de l\'analyse')
+        return
+      }
 
-      const parsed = parseReceiptText(text)
-      setScanResult(parsed)
+      setScanResult(data)
 
       // Vérifier si au moins un champ a été trouvé
-      if (!parsed.date && !parsed.litres && !parsed.prixLitre) {
+      const hasData = data.date || data.litres || data.prixLitre
+      if (!hasData) {
         setError('Aucune information n\'a pu être extraite. Essayez avec une photo plus nette.')
       }
     } catch (err) {
-      console.error('Erreur OCR:', err)
-      setError('Erreur lors de l\'analyse de l\'image. Veuillez réessayer.')
+      console.error('Erreur scan:', err)
+      setError('Erreur de connexion. Veuillez réessayer.')
     } finally {
       setIsProcessing(false)
     }
-  }, [selectedImage])
+  }, [selectedImage, imageMimeType])
 
   const handleValidate = useCallback(() => {
     if (scanResult) {
-      onScanComplete(scanResult)
+      const formData: { date?: string; litres?: string; prixLitre?: string } = {}
+      if (scanResult.date) formData.date = scanResult.date
+      if (scanResult.litres) formData.litres = scanResult.litres
+      if (scanResult.prixLitre) formData.prixLitre = scanResult.prixLitre
+      onScanComplete(formData)
       closeModal()
     }
   }, [scanResult, onScanComplete, closeModal])
@@ -264,22 +190,11 @@ export function ReceiptScanner({ onScanComplete, disabled = false }: ReceiptScan
                 </div>
               )}
 
-              {/* Barre de progression */}
+              {/* Indicateur de traitement */}
               {isProcessing && (
-                <div className="space-y-2 animate-fade-in">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-300 flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
-                      {progressLabel}
-                    </span>
-                    <span className="text-indigo-400 font-mono">{progress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300 ease-out"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
+                <div className="flex items-center justify-center gap-3 py-3 animate-fade-in">
+                  <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
+                  <span className="text-gray-300 text-sm">Analyse par Gemini AI en cours...</span>
                 </div>
               )}
 
@@ -302,8 +217,9 @@ export function ReceiptScanner({ onScanComplete, disabled = false }: ReceiptScan
                       label="Date"
                       value={scanResult.date}
                       formatValue={(v) => {
-                        const [y, m, d] = v.split('-')
-                        return `${d}/${m}/${y}`
+                        const parts = v.split('-')
+                        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
+                        return v
                       }}
                     />
                     <ScanResultField
@@ -318,9 +234,15 @@ export function ReceiptScanner({ onScanComplete, disabled = false }: ReceiptScan
                     />
                   </div>
 
-                  {/* Texte brut (toggle) */}
-                  {rawText && (
-                    <RawTextToggle text={rawText} />
+                  {/* Infos complémentaires */}
+                  {(scanResult.carburant || scanResult.montantTotal) && (
+                    <div className="border-t border-gray-700 pt-2 mt-2">
+                      <p className="text-xs text-gray-500 mb-1">Infos complémentaires</p>
+                      <div className="flex gap-3 text-xs text-gray-400">
+                        {scanResult.carburant && <span>⛽ {scanResult.carburant}</span>}
+                        {scanResult.montantTotal && <span>💰 {scanResult.montantTotal} €</span>}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -407,7 +329,7 @@ function ScanResultField({
   formatValue,
 }: {
   label: string
-  value?: string
+  value?: string | null
   formatValue?: (v: string) => string
 }) {
   return (
@@ -421,29 +343,6 @@ function ScanResultField({
         </span>
       ) : (
         <span className="text-sm text-gray-500 italic">Non détecté</span>
-      )}
-    </div>
-  )
-}
-
-/**
- * Toggle pour afficher/masquer le texte brut OCR
- */
-function RawTextToggle({ text }: { text: string }) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  return (
-    <div className="mt-2">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="text-xs text-gray-500 hover:text-gray-400 transition-colors underline"
-      >
-        {isOpen ? 'Masquer' : 'Voir'} le texte brut OCR
-      </button>
-      {isOpen && (
-        <pre className="mt-2 p-3 bg-gray-900 rounded-lg text-xs text-gray-400 overflow-x-auto max-h-40 overflow-y-auto border border-gray-700 whitespace-pre-wrap">
-          {text}
-        </pre>
       )}
     </div>
   )
