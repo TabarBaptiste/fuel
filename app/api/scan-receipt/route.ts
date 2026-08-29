@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, '')
 
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
           ],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 256,
+            maxOutputTokens: 1024,
+            responseMimeType: 'application/json',
           },
         }),
       }
