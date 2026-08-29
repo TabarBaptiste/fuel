@@ -57,6 +57,20 @@
   .table-cell {
     @apply px-4 py-3 text-sm text-gray-200;
   }
+
+  .btn-scan {
+    @apply text-sm px-3 py-2 rounded-lg font-medium
+           bg-gradient-to-r from-indigo-600/80 to-purple-600/80
+           text-white
+           hover:from-indigo-500/90 hover:to-purple-500/90
+           active:from-indigo-700 active:to-purple-700
+           transition-all duration-200
+           border border-indigo-500/30
+           shadow-lg shadow-indigo-500/10
+           backdrop-blur-sm
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
 }
 
 @layer utilities {
@@ -91,6 +105,40 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes scanLine {
+  0% {
+    top: 0%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+.animate-modal-in {
+  animation: modalIn 0.25s ease-out;
+}
+
+.scan-line-animation {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #818cf8, #a78bfa, #818cf8, transparent);
+  box-shadow: 0 0 15px 3px rgba(129, 140, 248, 0.4);
+  animation: scanLine 2s ease-in-out infinite alternate;
 }
 
 /* Custom scrollbar */
