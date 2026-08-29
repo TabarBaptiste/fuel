@@ -3,6 +3,7 @@ import { Wallet, Droplets, Route, Car, Plus, Loader2, Pencil, X } from 'lucide-r
 import { QuestionCard } from './QuestionCard'
 import { FormField } from './FormField'
 import { MiniStat } from './MiniStat'
+import { ReceiptScanner } from './ReceiptScanner'
 import { Stats, MonthlyStats, TripEstimate, NewEntryForm } from '@/lib/types'
 
 interface DashboardTabProps {
@@ -24,6 +25,7 @@ interface DashboardTabProps {
     isEditing?: boolean
     onCancelEdit?: () => void
     successSignal?: number
+    onScanComplete?: (data: { date?: string; litres?: string; prixLitre?: string }) => void
 }
 
 export function DashboardTab({
@@ -45,6 +47,7 @@ export function DashboardTab({
     isEditing = false,
     onCancelEdit,
     successSignal = 0,
+    onScanComplete,
 }: DashboardTabProps) {
     // Récupérer les dernières valeurs pour les placeholders
     const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null
@@ -63,13 +66,21 @@ export function DashboardTab({
         <div className="space-y-6 animate-fade-in">
             {/* Add Entry Form - Moved to top */}
             <div className="card p-5">
-                <h2 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
-                    {isEditing ? (
-                        <><Pencil className="w-5 h-5 text-indigo-600" /> Modifier la saisie</>
-                    ) : (
-                        <><Plus className="w-5 h-5 text-indigo-600" /> Ajouter un plein</>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-gray-100 flex items-center gap-2">
+                        {isEditing ? (
+                            <><Pencil className="w-5 h-5 text-indigo-600" /> Modifier la saisie</>
+                        ) : (
+                            <><Plus className="w-5 h-5 text-indigo-600" /> Ajouter un plein</>
+                        )}
+                    </h2>
+                    {!isEditing && onScanComplete && (
+                        <ReceiptScanner
+                            onScanComplete={onScanComplete}
+                            disabled={!isAuthenticated}
+                        />
                     )}
-                </h2>
+                </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <FormField label="Date">

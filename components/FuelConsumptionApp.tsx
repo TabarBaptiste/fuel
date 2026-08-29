@@ -218,6 +218,17 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     setError(null)
   }, [])
 
+  const handleScanComplete = useCallback((data: { date?: string; litres?: string; prixLitre?: string }) => {
+    setNewEntry((prev) => ({
+      ...prev,
+      ...(data.date && { date: data.date }),
+      ...(data.litres && { litres: data.litres }),
+      ...(data.prixLitre && { prixLitre: data.prixLitre }),
+    }))
+    setError(null)
+    setKmCompteurError(null)
+  }, [])
+
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !isLoading) addEntry()
   }, [addEntry, isLoading])
@@ -353,6 +364,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
             isEditing={editingId !== null}
             onCancelEdit={cancelEdit}
             successSignal={successSignal}
+            onScanComplete={handleScanComplete}
           />
         )}
 
