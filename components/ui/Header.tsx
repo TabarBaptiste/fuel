@@ -8,6 +8,7 @@ interface HeaderProps {
     onTankCapacityChange: (value: number) => void
     defaultCapacity: number
     isAuthenticated: boolean
+    currentUserName: string | null
     onLogin: (pin: string) => Promise<boolean>
     onLogout: () => void
     loginLoading: boolean
@@ -22,6 +23,7 @@ export function Header({
     onTankCapacityChange,
     defaultCapacity,
     isAuthenticated,
+    currentUserName,
     onLogin,
     onLogout,
     loginLoading,
@@ -64,6 +66,11 @@ export function Header({
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
+                            {isAuthenticated && currentUserName && (
+                                <span className="text-sm text-green-400 font-medium hidden sm:inline">
+                                    {currentUserName}
+                                </span>
+                            )}
                             <button
                                 onClick={isAuthenticated ? onLogout : () => setShowLoginModal(true)}
                                 className={`p-2 rounded-lg hover:bg-gray-700 transition-colors ${

@@ -6,7 +6,7 @@ async function main() {
   // Supprime les données existantes
   await prisma.fuelEntry.deleteMany()
 
-  // Insère les données initiales
+  // Insère les données initiales pour l'utilisateur 1
   await prisma.fuelEntry.createMany({
     data: [
       {
@@ -14,12 +14,14 @@ async function main() {
         kmCompteur: 151810,
         litres: 0,
         prixLitre: 0,
+        userId: 1,
       },
       {
         date: new Date('2025-12-14'),
         kmCompteur: 152198,
         litres: 35.25,
         prixLitre: 1.69,
+        userId: 1,
       },
     ],
   })

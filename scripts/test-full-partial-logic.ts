@@ -17,7 +17,8 @@ const testEntries: FuelEntry[] = [
     kmCompteur: 100000,
     litres: 45,
     prixLitre: 1.70,
-    isFullTank: true
+    isFullTank: true,
+    userId: 1
   },
   // Second full tank - consumption should be calculated
   {
@@ -26,7 +27,8 @@ const testEntries: FuelEntry[] = [
     kmCompteur: 100650,
     litres: 42,
     prixLitre: 1.72,
-    isFullTank: true
+    isFullTank: true,
+    userId: 1
   },
   // Partial tank - should NOT affect consumption calculation
   {
@@ -35,7 +37,8 @@ const testEntries: FuelEntry[] = [
     kmCompteur: 101000,
     litres: 20,
     prixLitre: 1.71,
-    isFullTank: false
+    isFullTank: false,
+    userId: 1
   },
   // Another partial tank - should NOT affect consumption calculation
   {
@@ -44,7 +47,8 @@ const testEntries: FuelEntry[] = [
     kmCompteur: 101300,
     litres: 15,
     prixLitre: 1.69,
-    isFullTank: false
+    isFullTank: false,
+    userId: 1
   },
   // Third full tank - consumption should be calculated using all litres since last full tank
   {
@@ -53,7 +57,8 @@ const testEntries: FuelEntry[] = [
     kmCompteur: 101750,
     litres: 48,
     prixLitre: 1.73,
-    isFullTank: true
+    isFullTank: true,
+    userId: 1
   },
   // Fourth full tank - consumption should be calculated
   {
@@ -62,7 +67,8 @@ const testEntries: FuelEntry[] = [
     kmCompteur: 102450,
     litres: 44,
     prixLitre: 1.74,
-    isFullTank: true
+    isFullTank: true,
+    userId: 1
   }
 ]
 

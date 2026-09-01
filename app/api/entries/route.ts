@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-// GET - Récupérer toutes les entrées
-export async function GET() {
+// GET - Récupérer les entrées d'un utilisateur
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'userId requis' },
+        { status: 400 }
+      )
+    }
+
     const entries = await prisma.fuelEntry.findMany({
+      where: { userId: parseInt(userId) },
       orderBy: { date: 'asc' },
     })
 
@@ -15,6 +26,7 @@ export async function GET() {
       litres: entry.litres,
       prixLitre: entry.prixLitre,
       isFullTank: entry.isFullTank,
+      userId: entry.userId,
     }))
 
     return NextResponse.json(formattedEntries)
@@ -31,10 +43,10 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { date, kmCompteur, litres, prixLitre, isFullTank } = body
+    const { date, kmCompteur, litres, prixLitre, isFullTank, userId } = body
 
     // Validation
-    if (!date || kmCompteur === undefined || litres === undefined || prixLitre === undefined) {
+    if (!date || kmCompteur === undefined || litres === undefined || prixLitre === undefined || !userId) {
       return NextResponse.json(
         { error: 'Tous les champs sont requis' },
         { status: 400 }
@@ -48,6 +60,7 @@ export async function POST(request: NextRequest) {
         litres: parseFloat(litres),
         prixLitre: parseFloat(prixLitre),
         isFullTank: isFullTank !== undefined ? isFullTank : true,
+        userId: parseInt(userId),
       },
     })
 
@@ -58,6 +71,7 @@ export async function POST(request: NextRequest) {
       litres: entry.litres,
       prixLitre: entry.prixLitre,
       isFullTank: entry.isFullTank,
+      userId: entry.userId,
     }, { status: 201 })
   } catch (error) {
     console.error('Erreur POST /api/entries:', error)
@@ -72,13 +86,25 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, date, kmCompteur, litres, prixLitre, isFullTank } = body
+    const { id, date, kmCompteur, litres, prixLitre, isFullTank, userId } = body
 
     // Validation
-    if (id === undefined || !date || kmCompteur === undefined || litres === undefined || prixLitre === undefined) {
+    if (id === undefined || !date || kmCompteur === undefined || litres === undefined || prixLitre === undefined || !userId) {
       return NextResponse.json(
         { error: 'Tous les champs sont requis' },
         { status: 400 }
+      )
+    }
+
+    // Vérifier que l'entrée appartient à l'utilisateur
+    const existing = await prisma.fuelEntry.findUnique({
+      where: { id: parseInt(id) },
+    })
+
+    if (!existing || existing.userId !== parseInt(userId)) {
+      return NextResponse.json(
+        { error: 'Entrée non trouvée ou accès non autorisé' },
+        { status: 403 }
       )
     }
 
@@ -100,6 +126,7 @@ export async function PUT(request: NextRequest) {
       litres: entry.litres,
       prixLitre: entry.prixLitre,
       isFullTank: entry.isFullTank,
+      userId: entry.userId,
     })
   } catch (error) {
     console.error('Erreur PUT /api/entries:', error)
@@ -115,11 +142,24 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+    const userId = searchParams.get('userId')
 
-    if (!id) {
+    if (!id || !userId) {
       return NextResponse.json(
-        { error: 'ID requis' },
+        { error: 'ID et userId requis' },
         { status: 400 }
+      )
+    }
+
+    // Vérifier que l'entrée appartient à l'utilisateur
+    const existing = await prisma.fuelEntry.findUnique({
+      where: { id: parseInt(id) },
+    })
+
+    if (!existing || existing.userId !== parseInt(userId)) {
+      return NextResponse.json(
+        { error: 'Entrée non trouvée ou accès non autorisé' },
+        { status: 403 }
       )
     }
 

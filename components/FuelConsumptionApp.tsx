@@ -24,11 +24,14 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   const [showSettings, setShowSettings] = useState(false)
   const [activeTab, setActiveTab] = useState<'dashboard' | 'history' | 'charts'>('dashboard')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
+  const [currentUserName, setCurrentUserName] = useState<string | null>(null)
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loginLoading, setLoginLoading] = useState(false)
   const [kmCompteurError, setKmCompteurError] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [successSignal, setSuccessSignal] = useState(0)
+  const [dataLoading, setDataLoading] = useState(false)
 
   const [newEntry, setNewEntry] = useState<NewEntryForm>({
     date: new Date().toISOString().split('T')[0],
@@ -57,26 +60,51 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     [tankCapacity, stats.prixMoyenLitreRecent]
   )
 
+  // Charger les entrées d'un utilisateur depuis l'API
+  const loadUserEntries = useCallback(async (userId: number) => {
+    setDataLoading(true)
+    try {
+      const response = await fetch(`/api/entries?userId=${userId}`)
+      if (!response.ok) throw new Error('Erreur lors du chargement des données')
+      const data = await response.json()
+      setEntries(data)
+    } catch (err) {
+      console.error('Erreur chargement entrées:', err)
+      setError('Impossible de charger les données. Veuillez réessayer.')
+    } finally {
+      setDataLoading(false)
+    }
+  }, [])
+
   // Charger l'état d'authentification depuis localStorage au montage
   useEffect(() => {
     const savedAuth = localStorage.getItem('fuelAppAuthenticated')
     const savedTimestamp = localStorage.getItem('fuelAppAuthTimestamp')
+    const savedUserId = localStorage.getItem('fuelAppUserId')
+    const savedUserName = localStorage.getItem('fuelAppUserName')
     
-    if (savedAuth === 'true' && savedTimestamp) {
+    if (savedAuth === 'true' && savedTimestamp && savedUserId) {
       const timestamp = parseInt(savedTimestamp)
       const now = Date.now()
       // Expiration après 30 jours (30 * 24 * 60 * 60 * 1000 ms)
       const thirtyDays = 30 * 24 * 60 * 60 * 1000
       
       if (now - timestamp < thirtyDays) {
+        const userId = parseInt(savedUserId)
         setIsAuthenticated(true)
+        setCurrentUserId(userId)
+        setCurrentUserName(savedUserName || null)
+        // Charger les données de l'utilisateur
+        loadUserEntries(userId)
       } else {
         // Nettoyer si l'authentification a expiré
         localStorage.removeItem('fuelAppAuthenticated')
         localStorage.removeItem('fuelAppAuthTimestamp')
+        localStorage.removeItem('fuelAppUserId')
+        localStorage.removeItem('fuelAppUserName')
       }
     }
-  }, [])
+  }, [loadUserEntries])
 
   const resetForm = useCallback(() => {
     setNewEntry({
@@ -94,6 +122,11 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   const addEntry = useCallback(async () => {
     if (!newEntry.litres || !newEntry.prixLitre) {
       setError('Veuillez remplir tous les champs requis')
+      return
+    }
+
+    if (!currentUserId) {
+      setError('Vous devez être connecté pour ajouter une entrée')
       return
     }
 
@@ -126,6 +159,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
       litres: parseFloat(newEntry.litres),
       prixLitre: parseFloat(newEntry.prixLitre),
       isFullTank: newEntry.isFullTank,
+      userId: currentUserId,
     }
 
     try {
@@ -166,7 +200,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     } finally {
       setIsLoading(false)
     }
-  }, [newEntry, entries, editingId, resetForm])
+  }, [newEntry, entries, editingId, resetForm, currentUserId])
 
   const startEdit = useCallback((entry: FuelEntry) => {
     setEditingId(entry.id)
@@ -190,11 +224,13 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
   }, [resetForm])
 
   const deleteEntry = useCallback(async (id: number) => {
+    if (!currentUserId) return
+
     setDeletingId(id)
     setError(null)
 
     try {
-      const response = await fetch(`/api/entries?id=${id}`, { method: 'DELETE' })
+      const response = await fetch(`/api/entries?id=${id}&userId=${currentUserId}`, { method: 'DELETE' })
       if (!response.ok) throw new Error('Erreur lors de la suppression')
       setEntries((prev) => prev.filter((e) => e.id !== id))
     } catch (err) {
@@ -203,7 +239,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     } finally {
       setDeletingId(null)
     }
-  }, [])
+  }, [currentUserId])
 
   const handleInputChange = useCallback((field: keyof NewEntryForm, value: string) => {
     setNewEntry((prev) => ({ ...prev, [field]: value }))
@@ -237,30 +273,52 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
     setLoginLoading(true)
     setLoginError(null)
 
-    // Simuler un délai pour l'UX
-    await new Promise(resolve => setTimeout(resolve, 500))
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      })
 
-    const correctPin = process.env.NEXT_PUBLIC_PIN_CODE
-    if (pin === correctPin) {
+      if (!response.ok) {
+        const data = await response.json()
+        setLoginError(data.error || 'Code incorrect. Veuillez réessayer.')
+        setLoginLoading(false)
+        return false
+      }
+
+      const data = await response.json()
       setIsAuthenticated(true)
+      setCurrentUserId(data.userId)
+      setCurrentUserName(data.name)
       // Sauvegarder l'authentification dans localStorage
       localStorage.setItem('fuelAppAuthenticated', 'true')
       localStorage.setItem('fuelAppAuthTimestamp', Date.now().toString())
+      localStorage.setItem('fuelAppUserId', data.userId.toString())
+      localStorage.setItem('fuelAppUserName', data.name)
+      // Charger les données de l'utilisateur
+      await loadUserEntries(data.userId)
       setLoginLoading(false)
       return true
-    } else {
-      setLoginError('Code incorrect. Veuillez réessayer.')
+    } catch (err) {
+      console.error('Erreur login:', err)
+      setLoginError('Erreur de connexion. Veuillez réessayer.')
       setLoginLoading(false)
       return false
     }
-  }, [])
+  }, [loadUserEntries])
 
   const handleLogout = useCallback(() => {
     setIsAuthenticated(false)
+    setCurrentUserId(null)
+    setCurrentUserName(null)
     setLoginError(null)
+    setEntries([])
     // Supprimer l'authentification du localStorage
     localStorage.removeItem('fuelAppAuthenticated')
     localStorage.removeItem('fuelAppAuthTimestamp')
+    localStorage.removeItem('fuelAppUserId')
+    localStorage.removeItem('fuelAppUserName')
   }, [])
 
   const handleExportData = useCallback(() => {
@@ -326,6 +384,7 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
         onTankCapacityChange={setTankCapacity}
         defaultCapacity={DEFAULT_TANK_CAPACITY}
         isAuthenticated={isAuthenticated}
+        currentUserName={currentUserName}
         onLogin={handleLogin}
         onLogout={handleLogout}
         loginLoading={loginLoading}
@@ -344,43 +403,52 @@ export default function FuelConsumptionApp({ initialEntries }: Props) {
 
         <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {activeTab === 'dashboard' && (
-          <DashboardTab
-            monthlyStats={monthlyStats}
-            stats={stats}
-            entries={entries}
-            tripDistance={tripDistance}
-            onTripDistanceChange={setTripDistance}
-            tripEstimate={tripEstimate}
-            fullTankCost={fullTankCost}
-            newEntry={newEntry}
-            onInputChange={handleInputChange}
-            onCheckboxChange={handleCheckboxChange}
-            onKeyPress={handleKeyPress}
-            isLoading={isLoading}
-            onAddEntry={addEntry}
-            isAuthenticated={isAuthenticated}
-            kmCompteurError={kmCompteurError}
-            isEditing={editingId !== null}
-            onCancelEdit={cancelEdit}
-            successSignal={successSignal}
-            onScanComplete={handleScanComplete}
-          />
-        )}
+        {dataLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+            <span className="ml-3 text-gray-400">Chargement des données...</span>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'dashboard' && (
+              <DashboardTab
+                monthlyStats={monthlyStats}
+                stats={stats}
+                entries={entries}
+                tripDistance={tripDistance}
+                onTripDistanceChange={setTripDistance}
+                tripEstimate={tripEstimate}
+                fullTankCost={fullTankCost}
+                newEntry={newEntry}
+                onInputChange={handleInputChange}
+                onCheckboxChange={handleCheckboxChange}
+                onKeyPress={handleKeyPress}
+                isLoading={isLoading}
+                onAddEntry={addEntry}
+                isAuthenticated={isAuthenticated}
+                kmCompteurError={kmCompteurError}
+                isEditing={editingId !== null}
+                onCancelEdit={cancelEdit}
+                successSignal={successSignal}
+                onScanComplete={handleScanComplete}
+              />
+            )}
 
-        {activeTab === 'history' && (
-          <HistoryTab
-            enrichedEntries={enrichedEntries}
-            onDelete={deleteEntry}
-            onEdit={startEdit}
-            deletingId={deletingId}
-            hasEntries={entries.length > 0}
-            isAuthenticated={isAuthenticated}
-          />
-        )}
+            {activeTab === 'history' && (
+              <HistoryTab
+                enrichedEntries={enrichedEntries}
+                onDelete={deleteEntry}
+                onEdit={startEdit}
+                deletingId={deletingId}
+                hasEntries={entries.length > 0}
+                isAuthenticated={isAuthenticated}
+              />
+            )}
 
-        {activeTab === 'charts' && (
-          <ChartsTab monthlyStats={monthlyStats} />
+            {activeTab === 'charts' && (
+              <ChartsTab monthlyStats={monthlyStats} />
+            )}
+          </>
         )}
       </main>
     </div>

@@ -7,6 +7,15 @@ datasource db {
   url       = env("DATABASE_URL")
 }
 
+model User {
+  id       Int         @id @default(autoincrement())
+  pinCode  String      @unique @db.VarChar(4)
+  name     String      @db.VarChar(50)
+  entries  FuelEntry[]
+
+  @@map("users")
+}
+
 model FuelEntry {
   id         Int      @id @default(autoincrement())
   date       DateTime @db.Date
@@ -14,6 +23,8 @@ model FuelEntry {
   litres     Float
   prixLitre  Float
   isFullTank Boolean  @default(true)
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

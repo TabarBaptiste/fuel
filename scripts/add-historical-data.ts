@@ -39,7 +39,8 @@ async function addHistoricalData() {
                         date: new Date(data.date),
                         kmCompteur: 0, // Pas de suivi kilométrique pour ces données historiques
                         litres: data.litres,
-                        prixLitre: data.prixLitre
+                        prixLitre: data.prixLitre,
+                        userId: 1,
                     }
                 })
                 console.log(`✅ Ajouté: ${data.date} - ${data.litres}L à ${data.prixLitre}€/L`)

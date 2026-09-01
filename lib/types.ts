@@ -5,6 +5,7 @@ export interface FuelEntry {
   litres: number
   prixLitre: number
   isFullTank: boolean
+  userId: number
 }
 
 export interface EnrichedFuelEntry extends FuelEntry {
